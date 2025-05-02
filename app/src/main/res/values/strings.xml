@@ -1,3 +1,14 @@
 <resources>
-    <string name="app_name">TextAiApp</string>
+    <string name="app_name" translatable="false">TextAiApp</string>
+    <string name="hint_name" translatable="false">Nome</string>
+    <string name="hint_age" translatable="false">Idade</string>
+    <string name="hint_gender" translatable="false">Gênero</string>
+    <string name="hint_phone" translatable="false">Telefone</string>
+    <string name="hint_email" translatable="false">Email</string>
+    <string name="hint_city" translatable="false">Cidade</string>
+    <string name="hint_state" translatable="false">Estado</string>
+    <string name="hint_country" translatable="false">País</string>
+    <string name="confirm">Confirmar</string>
+    <string name="lorem_ipsum">Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed eros sapien, bibendum non lobortis id, facilisis eget ipsum. Curabitur elementum id massa at euismod. Maecenas eget purus vulputate, porta sapien id, mollis odio. Mauris vulputate neque sed ipsum pellentesque ultricies. Nullam ac ipsum id diam euismod ornare. Aenean eu nisl arcu. Pellentesque et lacus ut nibh venenatis ornare ut sed neque. Morbi sit amet vulputate enim. Fusce nibh tellus, euismod tincidunt sem et, vehicula suscipit erat. Quisque sed malesuada nunc, vel faucibus nulla. Donec non mollis nibh. Phasellus fermentum, velit eget dictum eleifend, massa ipsum interdum tellus, a congue lacus dolor quis justo. Nullam felis justo, pretium at nulla sed, bibendum laoreet dui. Nulla a ante iaculis, interdum sapien vel, consequat risus. Phasellus molestie vulputate ex at interdum. Nulla a ex tempor, maximus nunc in, dapibus arcu. Cras gravida luctus ex, eu lobortis leo iaculis eget. Integer congue laoreet leo.</string>
+    <string name="hint_prompt">Insira seu texto ou prompt</string>
 </resources>
