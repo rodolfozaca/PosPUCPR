@@ -9,7 +9,7 @@
         android:id="@+id/personalDataFragment"
         android:name="com.rodolfoz.textaiapp.ui.PersonalDataFragment"
         android:label="fragment_personal_data"
-        tools:layout="@layout/fragment_personal_data" >
+        tools:layout="@layout/fragment_personal_data">
         <action
             android:id="@+id/action_personalDataFragment_to_promptAndResponseFragment"
             app:destination="@id/promptAndResponseFragment" />

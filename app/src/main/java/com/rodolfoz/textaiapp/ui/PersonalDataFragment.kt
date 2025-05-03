@@ -1,18 +1,18 @@
 package com.rodolfoz.textaiapp.ui
 
-import androidx.fragment.app.viewModels
 import android.os.Bundle
-import androidx.fragment.app.Fragment
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import androidx.fragment.app.Fragment
+import androidx.fragment.app.viewModels
+import androidx.navigation.fragment.findNavController
 import com.rodolfoz.textaiapp.R
+import com.rodolfoz.textaiapp.databinding.FragmentPersonalDataBinding
 
 class PersonalDataFragment : Fragment() {
 
-    companion object {
-        fun newInstance() = PersonalDataFragment()
-    }
+    private lateinit var binding: FragmentPersonalDataBinding
 
     private val viewModel: PersonalDataViewModel by viewModels()
 
@@ -26,6 +26,22 @@ class PersonalDataFragment : Fragment() {
         inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View {
-        return inflater.inflate(R.layout.fragment_personal_data, container, false)
+        binding = FragmentPersonalDataBinding.inflate(layoutInflater)
+        binding.viewModel = viewModel
+        binding.lifecycleOwner = viewLifecycleOwner
+
+        setListeners()
+
+        return binding.root
+    }
+
+    private fun setListeners() {
+
+        binding.apply {
+
+            btnConfirm.setOnClickListener {
+                findNavController().navigate(R.id.action_personalDataFragment_to_promptAndResponseFragment)
+            }
+        }
     }
 }

@@ -15,7 +15,6 @@ lifecycleViewmodelKtx = "2.6.1"
 fragmentKtx = "1.5.6"
 dataBindingKtx = "8.9.2"
 navigation = "2.7.3"
-navigationFragmentKtx = "2.8.9"
 navigationUiKtx = "2.8.9"
 
 [libraries]
@@ -32,8 +31,7 @@ androidx-lifecycle-livedata-ktx = { group = "androidx.lifecycle", name = "lifecy
 androidx-lifecycle-viewmodel-ktx = { group = "androidx.lifecycle", name = "lifecycle-viewmodel-ktx", version.ref = "lifecycleViewmodelKtx" }
 androidx-fragment-ktx = { group = "androidx.fragment", name = "fragment-ktx", version.ref = "fragmentKtx" }
 androidx-databinding-ktx = { group = "androidx.databinding", name = "databinding-runtime", version.ref = "dataBindingKtx" }
-androidx-navigation = { group = "androidx.navigation", name = "navigation-gfragmenet-ktx", version.ref = "navigation"}
-androidx-navigation-fragment-ktx = { group = "androidx.navigation", name = "navigation-fragment-ktx", version.ref = "navigationFragmentKtx" }
+androidx-navigation = { group = "androidx.navigation", name = "navigation-fragment-ktx", version.ref = "navigation" }
 androidx-navigation-ui-ktx = { group = "androidx.navigation", name = "navigation-ui-ktx", version.ref = "navigationUiKtx" }
 
 
