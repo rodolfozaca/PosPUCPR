@@ -34,6 +34,7 @@ import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalSoftwareKeyboardController
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
@@ -41,41 +42,92 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavHostController
 import com.rodolfoz.textaiapp.R
+import com.rodolfoz.textaiapp.data.UserDataModel
+import com.rodolfoz.textaiapp.ui.viewmodels.PersonalDataViewModel
 
+/**
+ * Composable function to display the personal data UI.
+ *
+ * @param navController The NavHostController for navigation.
+ * @param viewModel The PersonalDataViewModel instance.
+ */
 @SuppressLint("UnusedMaterial3ScaffoldPaddingParameter")
 @Composable
-fun PersonalDataUI(navController: NavHostController) {
+fun PersonalDataUI(navController: NavHostController, viewModel: PersonalDataViewModel?) {
 
     val context = LocalContext.current
     val userData = remember {
         mutableListOf(
-            mutableStateOf("Nome"),
-            mutableStateOf("Idade"),
-            mutableStateOf("Gênero"),
-            mutableStateOf("Telefone"),
-            mutableStateOf("Email"),
-            mutableStateOf("Cidade"),
-            mutableStateOf("Estado"),
-            mutableStateOf("País")
+            mutableStateOf(""),
+            mutableStateOf(""),
+            mutableStateOf(""),
+            mutableStateOf(""),
+            mutableStateOf(""),
+            mutableStateOf(""),
+            mutableStateOf(""),
+            mutableStateOf("")
         )
     }
+    val fieldLabels = mutableListOf(
+        stringResource(R.string.label_name),
+        stringResource(R.string.label_age),
+        stringResource(R.string.label_gender),
+        stringResource(R.string.label_phone),
+        stringResource(R.string.label_email),
+        stringResource(R.string.label_city),
+        stringResource(R.string.label_state),
+        stringResource(R.string.label_country)
+    )
 
     val focusRequester = List(userData.size) { FocusRequester() }
     val keyboController = LocalSoftwareKeyboardController.current
 
     Scaffold(
-        topBar = {
-        },
         bottomBar = {
             Button(
                 onClick = {
-                    navController.navigate("PromptAndResponseUI")
+                    val user = UserDataModel(
+                        name = userData[0].value,
+                        age = userData[1].value.toIntOrNull() ?: 0,
+                        gender = userData[2].value,
+                        phone = userData[3].value,
+                        email = userData[4].value,
+                        city = userData[5].value,
+                        state = userData[6].value,
+                        country = userData[7].value,
+
+                        )
+                    if (user.name.isNotBlank() && user.age > 0 && user.gender.isNotBlank() &&
+                        user.phone.isNotBlank() && user.email.isNotBlank() &&
+                        user.city.isNotBlank() && user.state.isNotBlank() && user.country.isNotBlank()
+                    ) {
+                        viewModel?.saveUserData(
+                            user,
+                            onSuccess = {
+                                Toast.makeText(
+                                    context,
+                                    context.getString(R.string.toast_text_data_save_success),
+                                    Toast.LENGTH_SHORT
+                                ).show()
+                                navController.navigate("PromptAndResponseUI")
+                            },
+                            onError = { errorMessage: String ->
+                                Toast.makeText(context, errorMessage, Toast.LENGTH_SHORT).show()
+                            }
+                        )
+                    } else {
+                        Toast.makeText(
+                            context,
+                            context.getString(R.string.toast_text_field_info_error),
+                            Toast.LENGTH_SHORT
+                        ).show()
+                    }
                 },
                 modifier = Modifier
                     .fillMaxWidth()
                     .padding(16.dp)
             ) {
-                Text(text = "Salvar")
+                Text(text = stringResource(R.string.save))
             }
         },
         modifier = Modifier.padding(WindowInsets.statusBars.asPaddingValues())
@@ -94,7 +146,7 @@ fun PersonalDataUI(navController: NavHostController) {
                 contentScale = ContentScale.Fit
             )
             Text(
-                text = "Foto",
+                text = stringResource(R.string.profile_image_text),
                 textAlign = TextAlign.Center,
                 fontSize = 16.sp,
                 color = Color.Blue,
@@ -102,9 +154,12 @@ fun PersonalDataUI(navController: NavHostController) {
                     .align(alignment = Alignment.CenterHorizontally)
                     .wrapContentWidth()
                     .clickable {
-                        Toast.makeText(context, "Insira a foto de perfil", Toast.LENGTH_SHORT)
-                            .show()
-                    }
+                        Toast.makeText(
+                            context,
+                            context.getString(R.string.toast_text_profile_image),
+                            Toast.LENGTH_SHORT
+                        ).show()
+                    },
             )
             LazyColumn(
                 modifier = Modifier
@@ -125,6 +180,7 @@ fun PersonalDataUI(navController: NavHostController) {
                                     userData[index].value = ""
                                 }
                             },
+                        label = { Text(fieldLabels[index]) },
                         keyboardOptions = KeyboardOptions.Default.copy(
                             imeAction = if (index == userData.size - 1) ImeAction.Done else ImeAction.Next
                         ),
@@ -151,5 +207,5 @@ fun PersonalDataUI(navController: NavHostController) {
 @Composable
 fun PersonalDataUIPreview() {
     val mockNavController = NavHostController(LocalContext.current)
-    PersonalDataUI(mockNavController)
+    PersonalDataUI(mockNavController, null)
 }

@@ -16,7 +16,7 @@
         <activity android:name=".MainActivity" />
 
         <activity
-            android:name="com.rodolfoz.textaiapp.ui.SplashActivity"
+            android:name=".ui.SplashActivity"
             android:exported="true">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />

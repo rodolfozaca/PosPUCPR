@@ -24,6 +24,7 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.Scaffold
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -36,13 +37,23 @@ import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavHostController
+import com.rodolfoz.textaiapp.R
+import com.rodolfoz.textaiapp.ui.viewmodels.PersonalDataViewModel
+
 
 @SuppressLint("UnusedMaterial3ScaffoldPaddingParameter")
 @Composable
-fun PromptAndResponseUI(navController: NavHostController) {
+fun PromptAndResponseUI(navController: NavHostController, viewModel: PersonalDataViewModel?) {
 
+    val context = LocalContext.current
     val prompt = remember { mutableStateOf("") }
     val promptResponse = remember { mutableStateOf("") }
+
+    LaunchedEffect(Unit) {
+        viewModel?.getUserName { name ->
+            promptResponse.value = context.getString(R.string.welcome_message)
+        }
+    }
 
     Scaffold(
         topBar = {
@@ -172,5 +183,5 @@ fun UserInputField(
 @Composable
 fun PreviewPromptAndResponseUI() {
     val mockNavController = NavHostController(LocalContext.current)
-    PromptAndResponseUI(mockNavController)
+    PromptAndResponseUI(mockNavController, null)
 }
