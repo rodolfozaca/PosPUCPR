@@ -36,9 +36,12 @@ import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import androidx.lifecycle.viewModelScope
 import androidx.navigation.NavHostController
 import com.rodolfoz.textaiapp.R
+import com.rodolfoz.textaiapp.domain.OllamaApiClient
 import com.rodolfoz.textaiapp.ui.viewmodels.PersonalDataViewModel
+import kotlinx.coroutines.launch
 
 
 @SuppressLint("UnusedMaterial3ScaffoldPaddingParameter")
@@ -84,8 +87,15 @@ fun PromptAndResponseUI(navController: NavHostController, viewModel: PersonalDat
                     .fillMaxWidth()
                     .border(1.dp, Color.Black, shape = RoundedCornerShape(1.dp)),
             ) {
-                UserInputField(prompt, onSend = {
-                    promptResponse.value = it
+                UserInputField(prompt, onSend = { userPromt ->
+                    viewModel?.viewModelScope?.launch {
+                        try {
+                            val response = OllamaApiClient.generate(userPromt)
+                            promptResponse.value = response ?: context.getString(R.string.api_error_message)
+                        } catch (e: Exception) {
+                            promptResponse.value = context.getString(R.string.api_error_message)
+                        }
+                    }
                     prompt.value = ""
                 })
             }

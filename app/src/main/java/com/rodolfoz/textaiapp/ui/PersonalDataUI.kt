@@ -187,7 +187,7 @@ fun PersonalDataUI(navController: NavHostController, viewModel: PersonalDataView
                         keyboardActions = KeyboardActions(
                             onNext = {
                                 if (index < userData.size - 1) {
-                                    focusRequester[index - 1].requestFocus()
+                                    focusRequester[index + 1].requestFocus()
                                 }
                             },
                             onDone = {

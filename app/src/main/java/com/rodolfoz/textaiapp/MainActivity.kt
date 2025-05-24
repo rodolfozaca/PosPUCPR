@@ -22,7 +22,7 @@ class MainActivity : AppCompatActivity() {
         enableEdgeToEdge()
         setContent {
             val navController = rememberNavController()
-            NavHost(navController, startDestination = "PersonalDataUI") {
+            NavHost(navController, startDestination = "PromptAndResponseUI") {
                 composable("PersonalDataUI") {
                     PersonalDataScreen(navController)
                 }

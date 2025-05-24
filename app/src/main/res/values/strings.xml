@@ -27,4 +27,5 @@
     <string name="toast_text_field_info_error">Preencha todos os campos corretamente</string>
     <string name="toast_text_profile_image">Insira a foto de perfil</string>
     <string name="welcome_message">Bem-vindo, %1$s!</string>
+    <string name="api_error_message">No response from API</string>
 </resources>
