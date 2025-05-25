@@ -1,13 +1,17 @@
 /*
- * RZDev Softwares 2025
+ * Rodolfo Zacarias - 2025.
  *
- * Todos os direitos reservados. Este software é propriedade exclusiva de
- * RZDev Softwares. É proibida a reprodução, distribuição ou modificação
- * deste código sem autorização expressa por escrito.
+ * All rights reserved. This software is the exclusive property of Rodolfo Zacarias.
+ * Redistribution, modification, or use of this code is permitted only under the terms
+ * of the GNU General Public License (GPL) as published by the Free Software Foundation,
+ * either version 3 of the License, or (at your option) any later version.
  *
- * O uso deste software é permitido apenas sob as condições especificadas em
- * um contrato de licença fornecido pelo autor. O autor não será responsável
- * por quaisquer danos diretos ou indiretos resultantes do uso deste software.
+ * This software is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY;
+ * without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
+ * See the GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License along with this program.
+ * If not, see <https://www.gnu.org/licenses/>.
  */
 package com.rodolfoz.textaiapp.domain
 
@@ -45,7 +49,7 @@ object OllamaApiClient {
 
     private val baseUrl: String = "http://192.168.15.10:11435"
     private val client: HttpClient = createHttpClient()
-    private const val TAG = "OllamaApiClient"
+    private const val TAG = "TAA: OllamaApiClient"
     private val model = "llama3:8b"
 
     /**
@@ -56,10 +60,6 @@ object OllamaApiClient {
      */
     suspend fun generate(prompt: String): String? {
         Log.d(TAG, "Generating response for prompt: $prompt")
-        Log.d(TAG, "generate: ")
-
-        val tags = listModelNames()
-        Log.d(TAG, "Modelos disponíveis: $tags")
 
         var response: HttpResponse? = null
         try {
@@ -69,7 +69,6 @@ object OllamaApiClient {
                 setBody(GenerateRequest(model, prompt))
             }
             Log.d(TAG, "Response status: ${response.status}")
-            Log.d(TAG, "Response body: ${response.bodyAsText()}")
         } catch (e: Exception) {
             Log.d(TAG, "Error: ${e.message}")
         }
@@ -130,6 +129,7 @@ object OllamaApiClient {
      * @return A list of model names as strings.
      */
     suspend fun listModelNames(): List<String> {
+        Log.d(TAG, "listModelNames")
         val response: HttpResponse = client.get("$baseUrl/api/tags")
         val json = response.bodyAsText()
         val parsed = Json.parseToJsonElement(json)
@@ -224,7 +224,9 @@ object OllamaApiClient {
 }
 
 fun createHttpClient(): HttpClient {
-    return HttpClient(OkHttp) {
+    val TAG = "TAA: OllamaApiClient"
+
+    val httpClient = HttpClient(OkHttp) {
         install(ContentNegotiation) {
             json(Json {
                 ignoreUnknownKeys = true
@@ -235,6 +237,9 @@ fun createHttpClient(): HttpClient {
             level = LogLevel.BODY
         }
     }
+
+    Log.d(TAG, "createHttpClient: $httpClient")
+    return httpClient
 }
 
 @Serializable

@@ -1,6 +1,22 @@
+/*
+ * Rodolfo Zacarias - 2025.
+ *
+ * All rights reserved. This software is the exclusive property of Rodolfo Zacarias.
+ * Redistribution, modification, or use of this code is permitted only under the terms
+ * of the GNU General Public License (GPL) as published by the Free Software Foundation,
+ * either version 3 of the License, or (at your option) any later version.
+ *
+ * This software is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY;
+ * without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
+ * See the GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License along with this program.
+ * If not, see <https://www.gnu.org/licenses/>.
+ */
 package com.rodolfoz.textaiapp.ui
 
 import android.annotation.SuppressLint
+import android.util.Log
 import android.widget.Toast
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.clickable
@@ -45,6 +61,8 @@ import com.rodolfoz.textaiapp.R
 import com.rodolfoz.textaiapp.data.UserDataModel
 import com.rodolfoz.textaiapp.ui.viewmodels.PersonalDataViewModel
 
+private const val TAG = "TAA: PersonalDataUI"
+
 /**
  * Composable function to display the personal data UI.
  *
@@ -54,6 +72,7 @@ import com.rodolfoz.textaiapp.ui.viewmodels.PersonalDataViewModel
 @SuppressLint("UnusedMaterial3ScaffoldPaddingParameter")
 @Composable
 fun PersonalDataUI(navController: NavHostController, viewModel: PersonalDataViewModel?) {
+    Log.d(TAG, "PersonalDataUI")
 
     val context = LocalContext.current
     val userData = remember {
@@ -80,12 +99,14 @@ fun PersonalDataUI(navController: NavHostController, viewModel: PersonalDataView
     )
 
     val focusRequester = List(userData.size) { FocusRequester() }
-    val keyboController = LocalSoftwareKeyboardController.current
+    val keyboardController = LocalSoftwareKeyboardController.current
 
     Scaffold(
         bottomBar = {
             Button(
                 onClick = {
+                    Log.d(TAG, "Save button clicked")
+
                     val user = UserDataModel(
                         name = userData[0].value,
                         age = userData[1].value.toIntOrNull() ?: 0,
@@ -95,8 +116,8 @@ fun PersonalDataUI(navController: NavHostController, viewModel: PersonalDataView
                         city = userData[5].value,
                         state = userData[6].value,
                         country = userData[7].value,
+                    )
 
-                        )
                     if (user.name.isNotBlank() && user.age > 0 && user.gender.isNotBlank() &&
                         user.phone.isNotBlank() && user.email.isNotBlank() &&
                         user.city.isNotBlank() && user.state.isNotBlank() && user.country.isNotBlank()
@@ -127,11 +148,11 @@ fun PersonalDataUI(navController: NavHostController, viewModel: PersonalDataView
                     .fillMaxWidth()
                     .padding(16.dp)
             ) {
-                Text(text = stringResource(R.string.save))
+                Text(text = stringResource(R.string.button_text_save))
             }
         },
         modifier = Modifier.padding(WindowInsets.statusBars.asPaddingValues())
-    ) { paddingValues ->
+    ) {
         Column(
             modifier = Modifier
                 .fillMaxSize()
@@ -154,6 +175,7 @@ fun PersonalDataUI(navController: NavHostController, viewModel: PersonalDataView
                     .align(alignment = Alignment.CenterHorizontally)
                     .wrapContentWidth()
                     .clickable {
+                        Log.d(TAG, "Profile image clicked")
                         Toast.makeText(
                             context,
                             context.getString(R.string.toast_text_profile_image),
@@ -191,7 +213,7 @@ fun PersonalDataUI(navController: NavHostController, viewModel: PersonalDataView
                                 }
                             },
                             onDone = {
-                                keyboController?.hide()
+                                keyboardController?.hide()
                                 navController.navigate("PromptAndResponseUI")
                             }
                         )
@@ -201,7 +223,6 @@ fun PersonalDataUI(navController: NavHostController, viewModel: PersonalDataView
         }
     }
 }
-
 
 @Preview(showBackground = true, name = "UiPreview")
 @Composable

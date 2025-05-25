@@ -1,19 +1,6 @@
 <resources>
     <string name="app_name" translatable="false">TextAiApp</string>
-    <string name="save">Salvar</string>
-    <string name="lorem_ipsum">Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed eros
-        sapien, bibendum non lobortis id, facilisis eget ipsum. Curabitur elementum id massa at
-        euismod. Maecenas eget purus vulputate, porta sapien id, mollis odio. Mauris vulputate
-        neque sed ipsum pellentesque ultricies. Nullam ac ipsum id diam euismod ornare. Aenean eu
-        nisl arcu. Pellentesque et lacus ut nibh venenatis ornare ut sed neque. Morbi sit amet
-        vulputate enim. Fusce nibh tellus, euismod tincidunt sem et, vehicula suscipit erat.
-        Quisque sed malesuada nunc, vel faucibus nulla. Donec non mollis nibh. Phasellus fermentum,
-        velit eget dictum eleifend, massa ipsum interdum tellus, a congue lacus dolor quis justo.
-        Nullam felis justo, pretium at nulla sed, bibendum laoreet dui. Nulla a ante iaculis,
-        interdum sapien vel, consequat risus. Phasellus molestie vulputate ex at interdum. Nulla a
-        ex tempor, maximus nunc in, dapibus arcu. Cras gravida luctus ex, eu lobortis leo iaculis
-        eget. Integer congue laoreet leo.</string>
-    <string name="hint_prompt">Insira seu texto ou prompt</string>
+    <string name="profile_image_text">Insira a foto de perfil</string>
     <string name="label_name">Nome</string>
     <string name="label_age">Idade</string>
     <string name="label_gender">Gênero</string>
@@ -22,10 +9,11 @@
     <string name="label_city">Cidade</string>
     <string name="label_state">Estado</string>
     <string name="label_country">País</string>
-    <string name="profile_image_text">Insira a foto de perfil</string>
+    <string name="button_text_save">Salvar</string>
+    <string name="hint_prompt">Insira seu texto ou prompt</string>
     <string name="toast_text_data_save_success">Dados salvos com sucesso</string>
     <string name="toast_text_field_info_error">Preencha todos os campos corretamente</string>
     <string name="toast_text_profile_image">Insira a foto de perfil</string>
-    <string name="welcome_message">Bem-vindo, %1$s!</string>
+    <string name="welcome_message">Bem-vindo</string>
     <string name="api_error_message">No response from API</string>
 </resources>

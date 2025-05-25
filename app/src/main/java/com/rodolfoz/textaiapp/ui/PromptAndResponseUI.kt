@@ -1,6 +1,22 @@
+/*
+ * Rodolfo Zacarias - 2025.
+ *
+ * All rights reserved. This software is the exclusive property of Rodolfo Zacarias.
+ * Redistribution, modification, or use of this code is permitted only under the terms
+ * of the GNU General Public License (GPL) as published by the Free Software Foundation,
+ * either version 3 of the License, or (at your option) any later version.
+ *
+ * This software is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY;
+ * without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
+ * See the GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License along with this program.
+ * If not, see <https://www.gnu.org/licenses/>.
+ */
 package com.rodolfoz.textaiapp.ui
 
 import android.annotation.SuppressLint
+import android.util.Log
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.interaction.MutableInteractionSource
@@ -43,10 +59,18 @@ import com.rodolfoz.textaiapp.domain.OllamaApiClient
 import com.rodolfoz.textaiapp.ui.viewmodels.PersonalDataViewModel
 import kotlinx.coroutines.launch
 
+private const val TAG = "TAA: PromptAndResponseUI"
 
+/**
+ * Composable function to display the prompt and response UI.
+ *
+ * @param navController The NavHostController for navigation.
+ * @param viewModel The PersonalDataViewModel instance.
+ */
 @SuppressLint("UnusedMaterial3ScaffoldPaddingParameter")
 @Composable
 fun PromptAndResponseUI(navController: NavHostController, viewModel: PersonalDataViewModel?) {
+    Log.d(TAG, "PromptAndResponseUI")
 
     val context = LocalContext.current
     val prompt = remember { mutableStateOf("") }
@@ -54,17 +78,13 @@ fun PromptAndResponseUI(navController: NavHostController, viewModel: PersonalDat
 
     LaunchedEffect(Unit) {
         viewModel?.getUserName { name ->
-            promptResponse.value = context.getString(R.string.welcome_message)
+            promptResponse.value = "${context.getString(R.string.welcome_message)}, $name!"
         }
     }
 
     Scaffold(
-        topBar = {
-        },
-        bottomBar = {
-        },
         modifier = Modifier.padding(WindowInsets.statusBars.asPaddingValues())
-    ) { paddingValues ->
+    ) {
         Column(
             modifier = Modifier
                 .fillMaxSize()
@@ -91,7 +111,8 @@ fun PromptAndResponseUI(navController: NavHostController, viewModel: PersonalDat
                     viewModel?.viewModelScope?.launch {
                         try {
                             val response = OllamaApiClient.generate(userPromt)
-                            promptResponse.value = response ?: context.getString(R.string.api_error_message)
+                            promptResponse.value =
+                                response ?: context.getString(R.string.api_error_message)
                         } catch (e: Exception) {
                             promptResponse.value = context.getString(R.string.api_error_message)
                         }
@@ -101,9 +122,13 @@ fun PromptAndResponseUI(navController: NavHostController, viewModel: PersonalDat
             }
         }
     }
-
 }
 
+/**
+ * Composable function to display the chat response field.
+ *
+ * @param promptResponse The mutable state holding the chat response text.
+ */
 @Composable
 fun ChatResponseField(
     promptResponse: MutableState<String>
@@ -122,6 +147,12 @@ fun ChatResponseField(
     )
 }
 
+/**
+ * Composable function to display the user input field.
+ *
+ * @param prompt The mutable state holding the user input text.
+ * @param onSend Callback function to handle the send action.
+ */
 @Composable
 fun UserInputField(
     prompt: MutableState<String>,
@@ -150,8 +181,6 @@ fun UserInputField(
                             .fillMaxSize()
                     ) {
                         innerTextField()
-
-
                         Box(
                             Modifier
                                 .align(Alignment.BottomEnd)
