@@ -26,7 +26,9 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.tooling.preview.Preview
 import com.rodolfoz.textaiapp.MainActivity
 import com.rodolfoz.textaiapp.R
 import kotlinx.coroutines.delay
@@ -59,7 +61,15 @@ fun SplashScreen(onTimeout: () -> Unit) {
     ) {
         Image(
             painter = painterResource(id = R.drawable.text_ai_splash_screen),
-            contentDescription = "Splash Screen"
+            contentDescription = "Splash Screen",
+            modifier = Modifier.fillMaxSize(),
+            contentScale = ContentScale.Crop
         )
     }
+}
+
+@Preview
+@Composable
+fun SplashScreenPreview() {
+    SplashScreen {}
 }

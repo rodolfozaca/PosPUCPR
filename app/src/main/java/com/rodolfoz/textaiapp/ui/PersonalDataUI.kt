@@ -26,6 +26,7 @@ import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.asPaddingValues
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.imePadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.statusBars
@@ -42,8 +43,6 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.focus.FocusRequester
-import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.focus.onFocusChanged
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
@@ -58,7 +57,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavHostController
 import com.rodolfoz.textaiapp.R
-import com.rodolfoz.textaiapp.data.UserDataModel
+import com.rodolfoz.textaiapp.data.model.UserDataModel
 import com.rodolfoz.textaiapp.ui.viewmodels.PersonalDataViewModel
 
 private const val TAG = "TAA: PersonalDataUI"
@@ -98,7 +97,6 @@ fun PersonalDataUI(navController: NavHostController, viewModel: PersonalDataView
         stringResource(R.string.label_country)
     )
 
-    val focusRequester = List(userData.size) { FocusRequester() }
     val keyboardController = LocalSoftwareKeyboardController.current
 
     Scaffold(
@@ -157,6 +155,7 @@ fun PersonalDataUI(navController: NavHostController, viewModel: PersonalDataView
             modifier = Modifier
                 .fillMaxSize()
                 .padding(top = 40.dp)
+                .imePadding()
         ) {
             Image(
                 painter = painterResource(id = R.drawable.baseline_account_circle_24),
@@ -196,7 +195,6 @@ fun PersonalDataUI(navController: NavHostController, viewModel: PersonalDataView
                         onValueChange = { newValue -> userData[index].value = newValue },
                         modifier = Modifier
                             .fillParentMaxWidth()
-                            .focusRequester(focusRequester[index])
                             .onFocusChanged { focusState ->
                                 if (focusState.isFocused) {
                                     userData[index].value = ""
@@ -207,14 +205,8 @@ fun PersonalDataUI(navController: NavHostController, viewModel: PersonalDataView
                             imeAction = if (index == userData.size - 1) ImeAction.Done else ImeAction.Next
                         ),
                         keyboardActions = KeyboardActions(
-                            onNext = {
-                                if (index < userData.size - 1) {
-                                    focusRequester[index + 1].requestFocus()
-                                }
-                            },
                             onDone = {
                                 keyboardController?.hide()
-                                navController.navigate("PromptAndResponseUI")
                             }
                         )
                     )

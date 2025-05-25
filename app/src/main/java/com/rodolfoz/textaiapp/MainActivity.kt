@@ -20,6 +20,7 @@ import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
 import androidx.appcompat.app.AppCompatActivity
 import androidx.compose.runtime.Composable
+import androidx.lifecycle.lifecycleScope
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
@@ -29,6 +30,7 @@ import com.rodolfoz.textaiapp.ui.PersonalDataUI
 import com.rodolfoz.textaiapp.ui.PromptAndResponseUI
 import com.rodolfoz.textaiapp.ui.viewmodels.PersonalDataViewModel
 import com.rodolfoz.textaiapp.ui.viewmodels.PersonalDataViewModelFactory
+import kotlinx.coroutines.launch
 
 /**
  * MainActivity that is the entry point of the application.
@@ -37,14 +39,25 @@ class MainActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
-        setContent {
-            val navController = rememberNavController()
-            NavHost(navController, startDestination = "PromptAndResponseUI") {
-                composable("PersonalDataUI") {
-                    PersonalDataScreen(navController)
-                }
-                composable("PromptAndResponseUI") {
-                    PromptAndResponseScreen(navController)
+
+        val destinations = listOf(
+            "PersonalDataUI",
+            "PromptAndResponseUI"
+        )
+        val userDataDao = DatabaseProvider.getDatabase(this).userDataDao()
+        lifecycleScope.launch {
+            val hasUser = userDataDao.getUserById(1) != null
+
+            setContent {
+                val navController = rememberNavController()
+                val startDestination = if (hasUser) destinations[1] else destinations[0]
+                NavHost(navController, startDestination = startDestination) {
+                    composable("PersonalDataUI") {
+                        PersonalDataScreen(navController)
+                    }
+                    composable("PromptAndResponseUI") {
+                        PromptAndResponseScreen()
+                    }
                 }
             }
         }
@@ -70,7 +83,7 @@ fun PersonalDataScreen(navController: androidx.navigation.NavHostController) {
 
 
 @Composable
-fun PromptAndResponseScreen(navController: androidx.navigation.NavHostController) {
+fun PromptAndResponseScreen() {
     val context = androidx.compose.ui.platform.LocalContext.current
     val database = DatabaseProvider.getDatabase(context)
     val userDataDao = database.userDataDao()
@@ -78,5 +91,5 @@ fun PromptAndResponseScreen(navController: androidx.navigation.NavHostController
         factory = PersonalDataViewModelFactory(userDataDao)
     )
 
-    PromptAndResponseUI(navController = navController, viewModel = viewModel)
+    PromptAndResponseUI(viewModel = viewModel)
 }

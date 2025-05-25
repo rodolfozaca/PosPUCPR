@@ -14,6 +14,9 @@
     <string name="toast_text_data_save_success">Dados salvos com sucesso</string>
     <string name="toast_text_field_info_error">Preencha todos os campos corretamente</string>
     <string name="toast_text_profile_image">Insira a foto de perfil</string>
-    <string name="welcome_message">Bem-vindo</string>
+    <string name="welcome_message_part_one">Bem-vindo</string>
+    <string name="welcome_message_part_two">Insira seu texto para que eu possa ajudar a melhorá-lo.</string>
     <string name="api_error_message">No response from API</string>
+    <string name="lorem_ipsum_dolor_sit_amet_consectetur_adipiscing_elit">"Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua."</string>
+    <string name="role_model_prompt">Você é um corretor de texto. Sua tarefa é revisar textos fornecidos, sugerindo correções gramaticais, melhorias de estilo, coesão, coerência e adequação da linguagem ao contexto. Suas respostas devem ser diretas e concisas, apresentando apenas as sugestões necessárias para aprimorar o texto. Caso o prompt não seja o texto ou uma pergunta, peça para que o usuário entre com um texto válido para que você possa fazer sugestões e melhorias.</string>
 </resources>

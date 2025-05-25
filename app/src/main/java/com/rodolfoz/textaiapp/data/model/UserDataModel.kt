@@ -13,7 +13,7 @@
  * You should have received a copy of the GNU General Public License along with this program.
  * If not, see <https://www.gnu.org/licenses/>.
  */
-package com.rodolfoz.textaiapp.data
+package com.rodolfoz.textaiapp.data.model
 
 import androidx.room.Entity
 import androidx.room.PrimaryKey

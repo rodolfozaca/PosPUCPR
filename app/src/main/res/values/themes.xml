@@ -6,4 +6,11 @@
     </style>
 
     <style name="Theme.TextAiApp" parent="Base.Theme.TextAiApp" />
+
+    <style name="Theme.TextAiApp.Splash" parent="Theme.Material3.DayNight.NoActionBar">
+        <item name="android:windowBackground">@drawable/text_ai_splash_screen</item>
+        <item name="android:windowNoTitle">true</item>
+        <item name="android:windowFullscreen">true</item>
+        <item name="android:windowDisablePreview">true</item>
+    </style>
 </resources>

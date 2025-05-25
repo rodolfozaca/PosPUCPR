@@ -19,7 +19,7 @@ import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.rodolfoz.textaiapp.data.UserDataDao
-import com.rodolfoz.textaiapp.data.UserDataModel
+import com.rodolfoz.textaiapp.data.model.UserDataModel
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 

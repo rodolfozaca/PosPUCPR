@@ -17,6 +17,7 @@ package com.rodolfoz.textaiapp.data
 
 import androidx.room.Database
 import androidx.room.RoomDatabase
+import com.rodolfoz.textaiapp.data.model.UserDataModel
 
 /**
  * The main database of the application.

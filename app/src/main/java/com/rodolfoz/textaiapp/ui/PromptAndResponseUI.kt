@@ -27,14 +27,18 @@ import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.asPaddingValues
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.imePadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.statusBars
+import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.BasicTextField
 import androidx.compose.foundation.text.KeyboardOptions
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.Send
 import androidx.compose.material.icons.filled.Refresh
+import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
@@ -48,13 +52,15 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewModelScope
-import androidx.navigation.NavHostController
 import com.rodolfoz.textaiapp.R
+import com.rodolfoz.textaiapp.domain.MessageUtil
 import com.rodolfoz.textaiapp.domain.OllamaApiClient
 import com.rodolfoz.textaiapp.ui.viewmodels.PersonalDataViewModel
 import kotlinx.coroutines.launch
@@ -64,57 +70,78 @@ private const val TAG = "TAA: PromptAndResponseUI"
 /**
  * Composable function to display the prompt and response UI.
  *
- * @param navController The NavHostController for navigation.
  * @param viewModel The PersonalDataViewModel instance.
  */
 @SuppressLint("UnusedMaterial3ScaffoldPaddingParameter")
 @Composable
-fun PromptAndResponseUI(navController: NavHostController, viewModel: PersonalDataViewModel?) {
+fun PromptAndResponseUI(viewModel: PersonalDataViewModel?) {
     Log.d(TAG, "PromptAndResponseUI")
 
     val context = LocalContext.current
     val prompt = remember { mutableStateOf("") }
     val promptResponse = remember { mutableStateOf("") }
+    val isLoading = remember { mutableStateOf(false) }
 
     LaunchedEffect(Unit) {
+        val messageOne = context.getString(R.string.welcome_message_part_one)
+        val messageTwo = context.getString(R.string.welcome_message_part_two)
+
         viewModel?.getUserName { name ->
-            promptResponse.value = "${context.getString(R.string.welcome_message)}, $name!"
+            promptResponse.value = "$messageOne, $name!\n$messageTwo"
         }
     }
 
     Scaffold(
-        modifier = Modifier.padding(WindowInsets.statusBars.asPaddingValues())
+        modifier = Modifier
+            .padding(WindowInsets.statusBars.asPaddingValues())
+            .imePadding()
     ) {
         Column(
             modifier = Modifier
                 .fillMaxSize()
                 .padding(2.dp)
+                .verticalScroll(rememberScrollState())
         ) {
             Box(
                 modifier = Modifier
-                    .weight(0.7f)
+                    .weight(0.8f)
                     .fillMaxWidth()
-                    .border(1.dp, Color.Black, shape = RoundedCornerShape(1.dp)),
+                    .background(color = Color.LightGray)
+                    .border(1.dp, Color.Black, shape = RoundedCornerShape(1.dp))
             ) {
-                ChatResponseField(promptResponse)
+                if (isLoading.value) {
+                    CircularProgressIndicator(
+                        color = Color.Black,
+                        modifier = Modifier.padding(8.dp)
+                    )
+                } else {
+                    ChatResponseField(promptResponse)
+                }
+
             }
 
             HorizontalDivider(modifier = Modifier.padding(2.dp))
 
             Box(
                 modifier = Modifier
-                    .weight(0.3f)
+                    .weight(0.2f)
                     .fillMaxWidth()
                     .border(1.dp, Color.Black, shape = RoundedCornerShape(1.dp)),
             ) {
                 UserInputField(prompt, onSend = { userPromt ->
+                    isLoading.value = true
                     viewModel?.viewModelScope?.launch {
                         try {
-                            val response = OllamaApiClient.generate(userPromt)
+                            val rolePrompt = context.getString(R.string.role_model_prompt)
+                            val tunedPrompt = "$rolePrompt\n\n$userPromt"
+                            val response = OllamaApiClient.generateStreamed(tunedPrompt)
+                            val cleanedResponse = MessageUtil.filterInvalidChars(response)
                             promptResponse.value =
-                                response ?: context.getString(R.string.api_error_message)
+                                cleanedResponse
                         } catch (e: Exception) {
                             promptResponse.value = context.getString(R.string.api_error_message)
+                        } finally {
+                            isLoading.value = false
                         }
                     }
                     prompt.value = ""
@@ -137,11 +164,15 @@ fun ChatResponseField(
         value = promptResponse.value,
         onValueChange = { promptResponse.value = it },
         modifier = Modifier
-            .fillMaxWidth()
             .fillMaxSize()
             .background(Color.LightGray)
-            .border(1.dp, Color.Gray, shape = RoundedCornerShape(1.dp)),
-        textStyle = TextStyle(Color.Black),
+            .padding(8.dp),
+        textStyle = TextStyle(
+            color = Color.Black,
+            fontSize = 20.sp,
+            letterSpacing = 0.5.sp,
+            lineHeight = 24.sp
+        ),
         interactionSource = remember { MutableInteractionSource() },
         keyboardOptions = KeyboardOptions.Default.copy(imeAction = ImeAction.None)
     )
@@ -162,9 +193,15 @@ fun UserInputField(
         value = prompt.value,
         onValueChange = { prompt.value = it },
         modifier = Modifier
-            .fillMaxWidth()
-            .background(Color.Gray),
-        textStyle = TextStyle(Color.Black),
+            .fillMaxSize()
+            .background(Color.LightGray)
+            .padding(8.dp),
+        textStyle = TextStyle(
+            color = Color.Black,
+            fontSize = 20.sp,
+            letterSpacing = 0.5.sp,
+            lineHeight = 24.sp
+        ),
         interactionSource = remember { MutableInteractionSource() },
         keyboardOptions = KeyboardOptions.Default.copy(imeAction = ImeAction.None),
         decorationBox = { innerTextField: @Composable () -> Unit ->
@@ -218,9 +255,27 @@ fun UserInputField(
     )
 }
 
-@Preview
+@Preview(showBackground = true, name = "ChatResponseField Preview")
+@Composable
+fun PreviewChatResponseField() {
+    val loremIpsum =
+        stringResource(R.string.lorem_ipsum_dolor_sit_amet_consectetur_adipiscing_elit)
+
+    val promptResponse = remember { mutableStateOf(loremIpsum) }
+    ChatResponseField(promptResponse)
+}
+
+@Preview(showBackground = true, name = "UserInputField Preview")
+@Composable
+fun PreviewUserInputField() {
+    val loremIpsum =
+        stringResource(R.string.lorem_ipsum_dolor_sit_amet_consectetur_adipiscing_elit)
+    val prompt = remember { mutableStateOf(loremIpsum) }
+    UserInputField(prompt, onSend = {})
+}
+
+@Preview(showBackground = true, name = "PromptAndResponseUIPreview")
 @Composable
 fun PreviewPromptAndResponseUI() {
-    val mockNavController = NavHostController(LocalContext.current)
-    PromptAndResponseUI(mockNavController, null)
+    PromptAndResponseUI(null)
 }

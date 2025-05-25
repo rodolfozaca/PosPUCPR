@@ -21,6 +21,7 @@ import androidx.room.Insert
 import androidx.room.OnConflictStrategy
 import androidx.room.Query
 import androidx.room.Update
+import com.rodolfoz.textaiapp.data.model.UserDataModel
 
 /**
  * Data Access Object (DAO) for performing database operations on the user data.
@@ -62,12 +63,4 @@ interface UserDataDao {
      */
     @Query("SELECT * FROM user_data WHERE id= :id")
     suspend fun getUserById(id: Int): UserDataModel?
-
-    /**
-     * Retrieves all users from the database.
-     *
-     * @return A list of all user data.
-     */
-    @Query("SELECT * FROM user_data")
-    suspend fun getAllUsers(): List<UserDataModel>
 }
