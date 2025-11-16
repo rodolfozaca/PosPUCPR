@@ -16,18 +16,14 @@ import com.rodolfoz.textaiapp.data.model.UserDataModel
 /**
  * The main database of the application.
  *
- * This class defines the Room database configuration and serves as the main access point
- * for the underlying SQLite database.
- *
- * @property userDataDao Provides access to the UserDataDao for performing database operations.
+ * Version bumped to 2 to accommodate new fields `login` and `password` in the
+ * [UserDataModel]. A migration from 1 -> 2 must be supplied by the database provider.
  */
-@Database(entities = [UserDataModel::class], version = 1, exportSchema = false)
+@Database(entities = [UserDataModel::class], version = 2, exportSchema = false)
 abstract class AppDataBase : RoomDatabase() {
 
     /**
      * Abstract method to get the UserDataDao.
-     *
-     * @return An instance of UserDataDao to interact with user data in the database.
      */
     abstract fun userDataDao(): UserDataDao
 }

@@ -12,17 +12,12 @@ package com.rodolfoz.textaiapp.ui.viewmodels
 import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
-import com.rodolfoz.textaiapp.data.UserDataDao
+import com.rodolfoz.textaiapp.data.UserRepository
 
 /**
- * Factory for creating instances of [PersonalDataViewModel].
- *
- * This factory ensures that the [PersonalDataViewModel] is created with the required
- * [UserDataDao] dependency.
- *
- * @property userDataDao The DAO used to interact with the user data in the database.
+ * Factory for creating instances of [PersonalDataViewModel] using a [UserRepository].
  */
-class PersonalDataViewModelFactory(private val userDataDao: UserDataDao) :
+class PersonalDataViewModelFactory(private val repository: UserRepository) :
     ViewModelProvider.Factory {
     private val TAG = "TAA:" + this::class.java.simpleName
 
@@ -38,7 +33,7 @@ class PersonalDataViewModelFactory(private val userDataDao: UserDataDao) :
 
         if (modelClass.isAssignableFrom(PersonalDataViewModel::class.java)) {
             @Suppress("UNCHECKED_CAST")
-            return PersonalDataViewModel(userDataDao) as T
+            return PersonalDataViewModel(repository) as T
         }
         throw IllegalArgumentException("Unknown ViewModel class")
     }

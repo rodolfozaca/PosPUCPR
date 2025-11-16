@@ -57,4 +57,13 @@ interface UserDataDao {
      */
     @Query("SELECT * FROM user_data WHERE id= :id")
     suspend fun getUserById(id: Int): UserDataModel?
+
+    /**
+     * Retrieves a user by their login (username).
+     *
+     * @param login The login/username to search for.
+     * @return The user data, or null if no user with the given login exists.
+     */
+    @Query("SELECT * FROM user_data WHERE login = :login LIMIT 1")
+    suspend fun getUserByLogin(login: String): UserDataModel?
 }

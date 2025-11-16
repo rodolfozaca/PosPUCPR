@@ -100,6 +100,7 @@ fun PersonalDataUI(navController: NavHostController, viewModel: PersonalDataView
                     Log.d(TAG, "Save button clicked")
 
                     val user = UserDataModel(
+                        id = 1,
                         name = userData[0].value,
                         age = userData[1].value.toIntOrNull() ?: 0,
                         gender = userData[2].value,
@@ -122,7 +123,8 @@ fun PersonalDataUI(navController: NavHostController, viewModel: PersonalDataView
                                     context.getString(R.string.toast_text_data_save_success),
                                     Toast.LENGTH_SHORT
                                 ).show()
-                                navController.navigate("PromptAndResponseUI")
+                                // Após salvar os dados pessoais, ir para a tela de criação de senha
+                                navController.navigate("PasswordSetupUI")
                             },
                             onError = { errorMessage: String ->
                                 Toast.makeText(context, errorMessage, Toast.LENGTH_SHORT).show()

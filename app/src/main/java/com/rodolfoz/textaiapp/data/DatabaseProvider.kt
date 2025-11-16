@@ -13,19 +13,12 @@
  * You should have received a copy of the GNU General Public License along with this program.
  * If not, see <https://www.gnu.org/licenses/>.
  */
-/*
- * Rodolfo Zacarias 2025
- *
- * All rights reserved. This software is the property of Rodolfo Zacarias.
- * Reproduction, distribution, or modification without written permission is prohibited.
- *
- * Use is subject to a license agreement. The author is not liable for any
- * direct or indirect damages resulting from use of this software.
- */
 package com.rodolfoz.textaiapp.data
 
 import android.content.Context
 import androidx.room.Room
+import androidx.room.migration.Migration
+import androidx.sqlite.db.SupportSQLiteDatabase
 
 /**
  * Provides a singleton instance of the AppDataBase.
@@ -47,11 +40,21 @@ object DatabaseProvider {
      */
     fun getDatabase(context: Context): AppDataBase {
         return INSTANCE ?: synchronized(this) {
+            // Migration 1 -> 2: adiciona colunas `login` e `password` na tabela user_data
+            val MIGRATION_1_2 = object : Migration(1, 2) {
+                override fun migrate(db: SupportSQLiteDatabase) {
+                    // Adiciona colunas com valor padrão vazio para manter compatibilidade
+                    db.execSQL("ALTER TABLE user_data ADD COLUMN login TEXT DEFAULT '' NOT NULL")
+                    db.execSQL("ALTER TABLE user_data ADD COLUMN password TEXT DEFAULT '' NOT NULL")
+                }
+            }
+
             val instance = Room.databaseBuilder(
                 context.applicationContext,
                 AppDataBase::class.java,
                 "app_database"
-            ).build()
+            ).addMigrations(MIGRATION_1_2)
+                .build()
             INSTANCE = instance
             instance
         }

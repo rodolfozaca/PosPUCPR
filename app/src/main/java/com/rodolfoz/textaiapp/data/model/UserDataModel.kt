@@ -24,6 +24,8 @@ import androidx.room.PrimaryKey
  * @property city The city where the user resides.
  * @property state The state where the user resides.
  * @property country The country where the user resides.
+ * @property login The login/username for authentication.
+ * @property password The hashed password for authentication.
  */
 @Entity(tableName = "user_data")
 class UserDataModel(
@@ -36,4 +38,6 @@ class UserDataModel(
     var city: String = "",
     var state: String = "",
     var country: String = "",
+    var login: String = "",
+    var password: String = ""
 )

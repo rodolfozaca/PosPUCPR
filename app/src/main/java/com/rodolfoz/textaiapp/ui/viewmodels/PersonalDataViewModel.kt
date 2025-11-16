@@ -12,20 +12,15 @@ package com.rodolfoz.textaiapp.ui.viewmodels
 import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.rodolfoz.textaiapp.data.UserDataDao
+import com.rodolfoz.textaiapp.data.UserRepository
 import com.rodolfoz.textaiapp.data.model.UserDataModel
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 
 /**
- * ViewModel for managing personal user data.
- *
- * This ViewModel interacts with the UserDataDao to perform database operations
- * and provides methods to save user data.
- *
- * @property userDataDao The DAO used to interact with the user data in the database.
+ * ViewModel for managing personal user data using a repository abstraction.
  */
-class PersonalDataViewModel(private val userDataDao: UserDataDao) : ViewModel() {
+class PersonalDataViewModel(private val repository: UserRepository) : ViewModel() {
 
     private val TAG = "TAA:" + this::class.java.simpleName
 
@@ -44,12 +39,14 @@ class PersonalDataViewModel(private val userDataDao: UserDataDao) : ViewModel() 
 
         viewModelScope.launch(Dispatchers.IO) {
             try {
-                userDataDao.insertUser(user)
+                repository.insertUser(user)
                 viewModelScope.launch(Dispatchers.Main) {
                     onSuccess()
                 }
             } catch (e: Exception) {
-                onError(e.message ?: "Error saving user data")
+                viewModelScope.launch(Dispatchers.Main) {
+                    onError(e.message ?: "Error saving user data")
+                }
             }
         }
     }
@@ -58,7 +55,7 @@ class PersonalDataViewModel(private val userDataDao: UserDataDao) : ViewModel() 
         Log.d(TAG, "getUserName")
 
         viewModelScope.launch {
-            val user = userDataDao.getUserById(1)
+            val user = repository.getUserById(1)
             onResult(user?.name)
         }
     }

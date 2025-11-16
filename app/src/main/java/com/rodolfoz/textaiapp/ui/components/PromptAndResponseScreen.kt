@@ -21,8 +21,9 @@ fun PromptAndResponseScreen() {
     val context = androidx.compose.ui.platform.LocalContext.current
     val database = DatabaseProvider.getDatabase(context)
     val userDataDao = database.userDataDao()
+    val repository = com.rodolfoz.textaiapp.data.UserRepository(userDataDao)
     val viewModel: PersonalDataViewModel = viewModel(
-        factory = PersonalDataViewModelFactory(userDataDao)
+        factory = PersonalDataViewModelFactory(repository)
     )
 
     PromptAndResponseUI(viewModel = viewModel)
