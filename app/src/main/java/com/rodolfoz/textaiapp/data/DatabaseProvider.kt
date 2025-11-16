@@ -13,6 +13,15 @@
  * You should have received a copy of the GNU General Public License along with this program.
  * If not, see <https://www.gnu.org/licenses/>.
  */
+/*
+ * Rodolfo Zacarias 2025
+ *
+ * All rights reserved. This software is the property of Rodolfo Zacarias.
+ * Reproduction, distribution, or modification without written permission is prohibited.
+ *
+ * Use is subject to a license agreement. The author is not liable for any
+ * direct or indirect damages resulting from use of this software.
+ */
 package com.rodolfoz.textaiapp.data
 
 import android.content.Context

@@ -1,17 +1,11 @@
 /*
- * Rodolfo Zacarias - 2025.
+ * Rodolfo Zacarias 2025
  *
- * All rights reserved. This software is the exclusive property of Rodolfo Zacarias.
- * Redistribution, modification, or use of this code is permitted only under the terms
- * of the GNU General Public License (GPL) as published by the Free Software Foundation,
- * either version 3 of the License, or (at your option) any later version.
+ * All rights reserved. This software is the property of Rodolfo Zacarias.
+ * Reproduction, distribution, or modification without written permission is prohibited.
  *
- * This software is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY;
- * without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
- * See the GNU General Public License for more details.
- *
- * You should have received a copy of the GNU General Public License along with this program.
- * If not, see <https://www.gnu.org/licenses/>.
+ * Use is subject to a license agreement. The author is not liable for any
+ * direct or indirect damages resulting from use of this software.
  */
 package com.rodolfoz.textaiapp.ui
 
@@ -20,18 +14,8 @@ import android.content.Intent
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
-import androidx.compose.foundation.Image
-import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.ui.Modifier
-import androidx.compose.ui.layout.ContentScale
-import androidx.compose.ui.res.painterResource
-import androidx.compose.ui.tooling.preview.Preview
 import com.rodolfoz.textaiapp.MainActivity
-import com.rodolfoz.textaiapp.R
-import kotlinx.coroutines.delay
+import com.rodolfoz.textaiapp.ui.components.SplashScreen
 
 /**
  * Activity that displays a splash screen for 2 seconds before navigating to the main activity.
@@ -47,29 +31,4 @@ class SplashActivity : ComponentActivity() {
             }
         }
     }
-}
-
-@Composable
-fun SplashScreen(onTimeout: () -> Unit) {
-    LaunchedEffect(Unit) {
-        delay(2000) // 2 seconds delay
-        onTimeout()
-    }
-
-    Box(
-        modifier = Modifier.fillMaxSize()
-    ) {
-        Image(
-            painter = painterResource(id = R.drawable.text_ai_splash_screen),
-            contentDescription = "Splash Screen",
-            modifier = Modifier.fillMaxSize(),
-            contentScale = ContentScale.Crop
-        )
-    }
-}
-
-@Preview
-@Composable
-fun SplashScreenPreview() {
-    SplashScreen {}
 }

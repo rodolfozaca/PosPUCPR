@@ -1,17 +1,11 @@
 /*
- * Rodolfo Zacarias - 2025.
+ * Rodolfo Zacarias 2025
  *
- * All rights reserved. This software is the exclusive property of Rodolfo Zacarias.
- * Redistribution, modification, or use of this code is permitted only under the terms
- * of the GNU General Public License (GPL) as published by the Free Software Foundation,
- * either version 3 of the License, or (at your option) any later version.
+ * All rights reserved. This software is the property of Rodolfo Zacarias.
+ * Reproduction, distribution, or modification without written permission is prohibited.
  *
- * This software is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY;
- * without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
- * See the GNU General Public License for more details.
- *
- * You should have received a copy of the GNU General Public License along with this program.
- * If not, see <https://www.gnu.org/licenses/>.
+ * Use is subject to a license agreement. The author is not liable for any
+ * direct or indirect damages resulting from use of this software.
  */
 package com.rodolfoz.textaiapp
 
@@ -19,17 +13,13 @@ import android.os.Bundle
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
 import androidx.appcompat.app.AppCompatActivity
-import androidx.compose.runtime.Composable
 import androidx.lifecycle.lifecycleScope
-import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import com.rodolfoz.textaiapp.data.DatabaseProvider
-import com.rodolfoz.textaiapp.ui.PersonalDataUI
-import com.rodolfoz.textaiapp.ui.PromptAndResponseUI
-import com.rodolfoz.textaiapp.ui.viewmodels.PersonalDataViewModel
-import com.rodolfoz.textaiapp.ui.viewmodels.PersonalDataViewModelFactory
+import com.rodolfoz.textaiapp.ui.components.PersonalDataScreen
+import com.rodolfoz.textaiapp.ui.components.PromptAndResponseScreen
 import kotlinx.coroutines.launch
 
 /**
@@ -44,6 +34,7 @@ class MainActivity : AppCompatActivity() {
             "PersonalDataUI",
             "PromptAndResponseUI"
         )
+
         val userDataDao = DatabaseProvider.getDatabase(this).userDataDao()
         lifecycleScope.launch {
             val hasUser = userDataDao.getUserById(1) != null
@@ -62,34 +53,4 @@ class MainActivity : AppCompatActivity() {
             }
         }
     }
-}
-
-/**
- * Composable function that sets up the PersonalData screen.
- *
- * @param navController The NavController for navigation.
- */
-@Composable
-fun PersonalDataScreen(navController: androidx.navigation.NavHostController) {
-    val context = androidx.compose.ui.platform.LocalContext.current
-    val database = DatabaseProvider.getDatabase(context)
-    val userDataDao = database.userDataDao()
-    val viewModel: PersonalDataViewModel = viewModel(
-        factory = PersonalDataViewModelFactory(userDataDao)
-    )
-
-    PersonalDataUI(navController = navController, viewModel = viewModel)
-}
-
-
-@Composable
-fun PromptAndResponseScreen() {
-    val context = androidx.compose.ui.platform.LocalContext.current
-    val database = DatabaseProvider.getDatabase(context)
-    val userDataDao = database.userDataDao()
-    val viewModel: PersonalDataViewModel = viewModel(
-        factory = PersonalDataViewModelFactory(userDataDao)
-    )
-
-    PromptAndResponseUI(viewModel = viewModel)
 }

@@ -1,19 +1,13 @@
 /*
- * Rodolfo Zacarias - 2025.
+ * Rodolfo Zacarias 2025
  *
- * All rights reserved. This software is the exclusive property of Rodolfo Zacarias.
- * Redistribution, modification, or use of this code is permitted only under the terms
- * of the GNU General Public License (GPL) as published by the Free Software Foundation,
- * either version 3 of the License, or (at your option) any later version.
+ * All rights reserved. This software is the property of Rodolfo Zacarias.
+ * Reproduction, distribution, or modification without written permission is prohibited.
  *
- * This software is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY;
- * without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
- * See the GNU General Public License for more details.
- *
- * You should have received a copy of the GNU General Public License along with this program.
- * If not, see <https://www.gnu.org/licenses/>.
+ * Use is subject to a license agreement. The author is not liable for any
+ * direct or indirect damages resulting from use of this software.
  */
-package com.rodolfoz.textaiapp.ui
+package com.rodolfoz.textaiapp.ui.components
 
 import android.annotation.SuppressLint
 import android.util.Log

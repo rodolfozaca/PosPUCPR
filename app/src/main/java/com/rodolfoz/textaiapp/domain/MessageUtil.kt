@@ -1,13 +1,11 @@
 /*
- * RZDev Softwares 2025
+ * Rodolfo Zacarias 2025
  *
- * Todos os direitos reservados. Este software é propriedade exclusiva de
- * RZDev Softwares. É proibida a reprodução, distribuição ou modificação
- * deste código sem autorização expressa por escrito.
+ * All rights reserved. This software is the property of Rodolfo Zacarias.
+ * Reproduction, distribution, or modification without written permission is prohibited.
  *
- * O uso deste software é permitido apenas sob as condições especificadas em
- * um contrato de licença fornecido pelo autor. O autor não será responsável
- * por quaisquer danos diretos ou indiretos resultantes do uso deste software.
+ * Use is subject to a license agreement. The author is not liable for any
+ * direct or indirect damages resulting from use of this software.
  */
 package com.rodolfoz.textaiapp.domain
 
@@ -33,9 +31,13 @@ object MessageUtil {
      * @param input The input string from which invalid characters will be filtered.
      * @return The resulting string after filtering invalid characters.
      */
-    fun filterInvalidChars(input: String): String {
+    fun filterInvalidChars(input: String?): String? {
         println("$TAG - filterInvalidChars")
 
-        return input.substringAfterLast(CHAT_INVALID_RESPONSE_CHARS, input)
+         val filteredResponse = input?.let { it ->
+            it.substringAfterLast(CHAT_INVALID_RESPONSE_CHARS, it)
+        }
+
+        return filteredResponse
     }
 }
