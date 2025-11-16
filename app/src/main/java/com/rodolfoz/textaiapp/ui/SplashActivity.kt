@@ -16,6 +16,7 @@ import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import com.rodolfoz.textaiapp.MainActivity
 import com.rodolfoz.textaiapp.ui.components.SplashScreen
+import com.rodolfoz.textaiapp.ui.theme.TextAiAppTheme
 
 /**
  * Activity that displays a splash screen for 2 seconds before navigating to the main activity.
@@ -25,9 +26,11 @@ class SplashActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContent {
-            SplashScreen {
-                startActivity(Intent(this, MainActivity::class.java))
-                finish()
+            TextAiAppTheme {
+                SplashScreen {
+                    startActivity(Intent(this, MainActivity::class.java))
+                    finish()
+                }
             }
         }
     }

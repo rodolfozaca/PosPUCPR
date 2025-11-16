@@ -47,6 +47,8 @@ dependencies {
     val composeBom = platform("androidx.compose:compose-bom:2025.05.00")
 
     implementation(libs.androidx.core.ktx)
+    // Gson for parsing Ollama responses into data classes
+    implementation(libs.gson)
     implementation(libs.androidx.appcompat)
     implementation(libs.material)
     implementation(libs.androidx.activity)

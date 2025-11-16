@@ -9,7 +9,6 @@
  */
 package com.rodolfoz.textaiapp
 
-import android.content.Context
 import android.os.Bundle
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
@@ -23,6 +22,7 @@ import com.rodolfoz.textaiapp.ui.components.LoginScreen
 import com.rodolfoz.textaiapp.ui.components.PasswordSetupScreen
 import com.rodolfoz.textaiapp.ui.components.PersonalDataScreen
 import com.rodolfoz.textaiapp.ui.components.PromptAndResponseScreen
+import com.rodolfoz.textaiapp.ui.theme.TextAiAppTheme
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
@@ -39,7 +39,7 @@ class MainActivity : AppCompatActivity() {
 
         // Checar credenciais salvas nas preferencias e validar com o DB
         lifecycleScope.launch {
-            val prefs = getSharedPreferences("app_prefs", Context.MODE_PRIVATE)
+            val prefs = getSharedPreferences("app_prefs", MODE_PRIVATE)
             val savedLogin = prefs.getString("saved_login", null)
             val savedHash = prefs.getString("saved_password_hash", null)
 
@@ -56,19 +56,21 @@ class MainActivity : AppCompatActivity() {
             }
 
             setContent {
-                val navController = rememberNavController()
-                NavHost(navController, startDestination = startDestination) {
-                    composable("PersonalDataUI") {
-                        PersonalDataScreen(navController)
-                    }
-                    composable("LoginUI") {
-                        LoginScreen(navController)
-                    }
-                    composable("PasswordSetupUI") {
-                        PasswordSetupScreen(navController)
-                    }
-                    composable("PromptAndResponseUI") {
-                        PromptAndResponseScreen()
+                TextAiAppTheme {
+                    val navController = rememberNavController()
+                    NavHost(navController, startDestination = startDestination) {
+                        composable("PersonalDataUI") {
+                            PersonalDataScreen(navController)
+                        }
+                        composable("LoginUI") {
+                            LoginScreen(navController)
+                        }
+                        composable("PasswordSetupUI") {
+                            PasswordSetupScreen(navController)
+                        }
+                        composable("PromptAndResponseUI") {
+                            PromptAndResponseScreen()
+                        }
                     }
                 }
             }

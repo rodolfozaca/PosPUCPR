@@ -18,12 +18,15 @@ import io.ktor.client.plugins.logging.Logging
 import io.ktor.client.request.post
 import io.ktor.client.request.setBody
 import io.ktor.client.statement.HttpResponse
-import io.ktor.client.statement.bodyAsText
+import io.ktor.client.statement.bodyAsChannel
 import io.ktor.http.ContentType
 import io.ktor.http.contentType
 import io.ktor.serialization.kotlinx.json.json
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.json.Json
+import kotlinx.serialization.json.booleanOrNull
+import kotlinx.serialization.json.jsonObject
+import kotlinx.serialization.json.jsonPrimitive
 
 
 /**
@@ -49,16 +52,31 @@ object OllamaApiClient {
         Log.d(TAG, "Generating response for prompt: $prompt")
         Log.d(TAG, "generate: ")
 
-        var response: HttpResponse? = null
+        val builder = StringBuilder()
+        val requestBody = GenerateRequest(model = model, prompt = prompt)
+
         try {
-            response = client.post("$baseUrl/api/generate") {
+            val response: HttpResponse = client.post("$baseUrl/api/generate") {
                 contentType(ContentType.Application.Json)
-                setBody(GenerateRequest(model, prompt))
+                setBody(requestBody)
+            }
+
+            val channel = response.bodyAsChannel()
+            while (!channel.isClosedForRead) {
+                val line = channel.readUTF8Line(8192)
+                if (!line.isNullOrBlank()) {
+                    val json = Json.parseToJsonElement(line).jsonObject
+                    val text = json["response"]?.jsonPrimitive?.content.orEmpty()
+                    builder.append(text)
+                    val done = json["done"]?.jsonPrimitive?.booleanOrNull ?: false
+                    if (done) break
+                }
             }
         } catch (e: Exception) {
-            Log.d(TAG, "Error: ${e.message}")
+            Log.d(TAG, "Error streaming response: ${e.message}")
         }
-        return response?.bodyAsText()
+
+        return builder.toString()
     }
 }
 

@@ -36,6 +36,7 @@ import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -44,7 +45,6 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.TextStyle
@@ -100,12 +100,16 @@ fun PromptAndResponseUI(viewModel: PersonalDataViewModel?) {
                 modifier = Modifier
                     .weight(0.8f)
                     .fillMaxWidth()
-                    .background(color = Color.LightGray)
-                    .border(1.dp, Color.Black, shape = RoundedCornerShape(1.dp))
+                    .background(color = MaterialTheme.colorScheme.surface)
+                    .border(
+                        1.dp,
+                        MaterialTheme.colorScheme.onSurface,
+                        shape = RoundedCornerShape(1.dp)
+                    )
             ) {
                 if (isLoading.value) {
                     CircularProgressIndicator(
-                        color = Color.Black,
+                        color = MaterialTheme.colorScheme.primary,
                         modifier = Modifier.padding(8.dp)
                     )
                 } else {
@@ -120,7 +124,11 @@ fun PromptAndResponseUI(viewModel: PersonalDataViewModel?) {
                 modifier = Modifier
                     .weight(0.2f)
                     .fillMaxWidth()
-                    .border(1.dp, Color.Black, shape = RoundedCornerShape(1.dp)),
+                    .border(
+                        1.dp,
+                        MaterialTheme.colorScheme.onSurface,
+                        shape = RoundedCornerShape(1.dp)
+                    ),
             ) {
                 UserInputField(prompt, onSend = { userPromt ->
                     isLoading.value = true
@@ -131,10 +139,11 @@ fun PromptAndResponseUI(viewModel: PersonalDataViewModel?) {
                             val response = OllamaApiClient.generate(tunedPrompt)
                             val cleanedResponse = MessageUtil.filterInvalidChars(response)
                             if (cleanedResponse != null) {
-                                promptResponse.value =
-                                    cleanedResponse
+                                promptResponse.value = cleanedResponse
                             }
                         } catch (e: Exception) {
+                            // Log the exception for diagnostics and show a friendly message
+                            Log.e(TAG, "Error calling Ollama API", e)
                             promptResponse.value = context.getString(R.string.api_error_message)
                         } finally {
                             isLoading.value = false
@@ -161,10 +170,10 @@ fun ChatResponseField(
         onValueChange = { promptResponse.value = it },
         modifier = Modifier
             .fillMaxSize()
-            .background(Color.LightGray)
+            .background(MaterialTheme.colorScheme.surface)
             .padding(8.dp),
         textStyle = TextStyle(
-            color = Color.Black,
+            color = MaterialTheme.colorScheme.onSurface,
             fontSize = 20.sp,
             letterSpacing = 0.5.sp,
             lineHeight = 24.sp
@@ -190,10 +199,10 @@ fun UserInputField(
         onValueChange = { prompt.value = it },
         modifier = Modifier
             .fillMaxSize()
-            .background(Color.LightGray)
+            .background(MaterialTheme.colorScheme.surface)
             .padding(8.dp),
         textStyle = TextStyle(
-            color = Color.Black,
+            color = MaterialTheme.colorScheme.onSurface,
             fontSize = 20.sp,
             letterSpacing = 0.5.sp,
             lineHeight = 24.sp
@@ -203,7 +212,7 @@ fun UserInputField(
         decorationBox = { innerTextField: @Composable () -> Unit ->
             Box(
                 Modifier
-                    .background(Color.LightGray, shape = RoundedCornerShape(8.dp))
+                    .background(MaterialTheme.colorScheme.surface, shape = RoundedCornerShape(8.dp))
             ) {
                 Row(
                     Modifier.fillMaxSize()
@@ -228,7 +237,7 @@ fun UserInputField(
                                     Icon(
                                         Icons.Default.Refresh,
                                         contentDescription = "Refresh",
-                                        tint = Color.Black
+                                        tint = MaterialTheme.colorScheme.primary
                                     )
                                 }
                                 IconButton(onClick = {
@@ -239,7 +248,7 @@ fun UserInputField(
                                     Icon(
                                         Icons.AutoMirrored.Filled.Send,
                                         contentDescription = "Send",
-                                        tint = Color.Black
+                                        tint = MaterialTheme.colorScheme.primary
                                     )
                                 }
                             }
