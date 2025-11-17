@@ -23,7 +23,7 @@ import com.rodolfoz.textaiapp.ui.components.LoginScreen
 import com.rodolfoz.textaiapp.ui.components.PasswordSetupScreen
 import com.rodolfoz.textaiapp.ui.components.PersonalDataScreen
 import com.rodolfoz.textaiapp.ui.components.PromptAndResponseScreen
-import com.rodolfoz.textaiapp.ui.components.componetest.PromptsListUI
+import com.rodolfoz.textaiapp.ui.components.PromptsListUI
 import com.rodolfoz.textaiapp.ui.theme.TextAiAppTheme
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch

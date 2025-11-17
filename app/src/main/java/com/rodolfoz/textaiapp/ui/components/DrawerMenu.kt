@@ -7,8 +7,9 @@
  * Use is subject to a license agreement. The author is not liable for any
  * direct or indirect damages resulting from use of this software.
  */
-package com.rodolfoz.textaiapp.ui.components.componetest
+package com.rodolfoz.textaiapp.ui.components
 
+import android.content.Context
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
@@ -109,7 +110,7 @@ fun DrawerMenu(navController: NavHostController, userName: String?) {
                     try {
                         val prefs = context.getSharedPreferences(
                             "app_prefs",
-                            android.content.Context.MODE_PRIVATE
+                            Context.MODE_PRIVATE
                         )
                         prefs.edit().remove("saved_login").remove("saved_password_hash")
                             .remove("remember_login").apply()

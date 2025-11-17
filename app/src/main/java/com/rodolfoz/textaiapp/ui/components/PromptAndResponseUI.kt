@@ -102,7 +102,7 @@ fun PromptAndResponseUI(viewModel: PersonalDataViewModel?, navController: NavHos
     ModalNavigationDrawer(
         drawerState = drawerState,
         drawerContent = {
-            com.rodolfoz.textaiapp.ui.components.componetest.DrawerMenu(
+            DrawerMenu(
                 navController,
                 userNameState.value
             )
