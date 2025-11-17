@@ -43,6 +43,28 @@ class FirebasePromptsRepository(private val firestore: FirebaseFirestore = Fireb
         }
     }
 
-    // Additional helpers (not implemented now): getRecentPrompts, listenPrompts, deletePrompt
+    /**
+     * Fetch recent prompts for the user (ordered desc by createdAt).
+     */
+    suspend fun getPrompts(userId: String, limit: Long = 100): Result<List<PromptResponse>> {
+        try {
+            if (userId.isBlank()) return Result.failure(IllegalArgumentException("userId required"))
+            val q = userPromptsCollection(userId).orderBy("createdAt", com.google.firebase.firestore.Query.Direction.DESCENDING).limit(limit)
+            val snap = q.get().await()
+            val list = snap.documents.map { doc ->
+                val pr = PromptResponse()
+                pr.id = doc.id
+                pr.userId = doc.getString("userId") ?: ""
+                pr.prompt = doc.getString("prompt") ?: ""
+                pr.response = doc.getString("response") ?: ""
+                pr.createdAt = doc.getTimestamp("createdAt")
+                pr
+            }
+            Log.d(TAG, "Fetched ${list.size} prompts for user=$userId")
+            return Result.success(list)
+        } catch (e: Exception) {
+            Log.w(TAG, "getPrompts failed: ${e.message}")
+            return Result.failure(e)
+        }
+    }
 }
-

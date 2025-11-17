@@ -28,20 +28,22 @@ import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.automirrored.filled.ExitToApp
-import androidx.compose.material3.AlertDialog
+import androidx.compose.material.icons.filled.Menu
 import androidx.compose.material3.CircularProgressIndicator
+import androidx.compose.material3.DrawerValue
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.ModalNavigationDrawer
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
-import androidx.compose.material3.TextButton
+import androidx.compose.material3.rememberDrawerState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
@@ -80,7 +82,9 @@ fun PromptAndResponseUI(viewModel: PersonalDataViewModel?, navController: NavHos
     val prompt = remember { mutableStateOf("") }
     val promptResponse = remember { mutableStateOf("") }
     val isLoading = remember { mutableStateOf(false) }
-    val showLogoutDialog = remember { mutableStateOf(false) }
+    val drawerState = rememberDrawerState(initialValue = DrawerValue.Closed)
+    val userNameState = remember { mutableStateOf<String?>(null) }
+    val coroutineScope = rememberCoroutineScope()
 
     // repository for saving prompts in Firestore
     val promptsRepo = FirebasePromptsRepository()
@@ -91,184 +95,149 @@ fun PromptAndResponseUI(viewModel: PersonalDataViewModel?, navController: NavHos
 
         viewModel?.getUserName { name ->
             promptResponse.value = "$messageOne, $name!\n$messageTwo"
+            userNameState.value = name // Update the username state
         }
     }
 
-    Scaffold(
-        modifier = Modifier
-            .padding(WindowInsets.statusBars.asPaddingValues())
-            .imePadding()
+    ModalNavigationDrawer(
+        drawerState = drawerState,
+        drawerContent = {
+            com.rodolfoz.textaiapp.ui.components.componetest.DrawerMenu(
+                navController,
+                userNameState.value
+            )
+        }
     ) {
-        Column(
+        Scaffold(
             modifier = Modifier
-                .fillMaxSize()
-                .padding(2.dp)
+                .padding(WindowInsets.statusBars.asPaddingValues())
+                .imePadding()
         ) {
-            Row(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .background(MaterialTheme.colorScheme.surface)
-                    .padding(8.dp),
-                verticalAlignment = Alignment.CenterVertically
-            ) {
-                Text(
-                    text = "TextAIApp",
-                    style = TextStyle(fontSize = 18.sp),
-                    color = MaterialTheme.colorScheme.onPrimaryContainer
-                )
-                Box(modifier = Modifier.weight(1f))
-                IconButton(onClick = { showLogoutDialog.value = true }) {
-                    Icon(Icons.AutoMirrored.Filled.ExitToApp, contentDescription = "Logout")
-                }
-            }
-
-            HorizontalDivider(modifier = Modifier.padding(2.dp))
-
             Column(
                 modifier = Modifier
                     .fillMaxSize()
                     .padding(2.dp)
-                    .verticalScroll(rememberScrollState())
             ) {
-                Box(
+                Row(
                     modifier = Modifier
-                        .weight(0.8f)
                         .fillMaxWidth()
-                        .background(color = MaterialTheme.colorScheme.surface)
-                        .border(
-                            1.dp,
-                            MaterialTheme.colorScheme.onSurface,
-                            shape = RoundedCornerShape(1.dp)
-                        )
+                        .background(MaterialTheme.colorScheme.surface)
+                        .padding(8.dp),
+                    verticalAlignment = Alignment.CenterVertically
                 ) {
-                    if (isLoading.value) {
-                        CircularProgressIndicator(
-                            color = MaterialTheme.colorScheme.primary,
-                            modifier = Modifier.padding(8.dp)
-                        )
-                    } else {
-                        ChatResponseField(promptResponse)
+                    Text(
+                        text = "TextAIApp",
+                        style = TextStyle(fontSize = 18.sp),
+                        color = MaterialTheme.colorScheme.onPrimaryContainer
+                    )
+                    Box(modifier = Modifier.weight(1f))
+                    IconButton(onClick = { coroutineScope.launch { drawerState.open() } }) {
+                        Icon(Icons.Filled.Menu, contentDescription = "Menu")
                     }
                 }
 
                 HorizontalDivider(modifier = Modifier.padding(2.dp))
 
-                Box(
+                Column(
                     modifier = Modifier
-                        .weight(0.2f)
-                        .fillMaxWidth()
-                        .border(
-                            1.dp,
-                            MaterialTheme.colorScheme.onSurface,
-                            shape = RoundedCornerShape(1.dp)
-                        ),
+                        .fillMaxSize()
+                        .padding(2.dp)
+                        .verticalScroll(rememberScrollState())
                 ) {
-                    UserInputField(prompt, onSend = { userPromt ->
-                        isLoading.value = true
-                        viewModel?.viewModelScope?.launch {
-                            try {
-                                val rolePrompt = context.getString(R.string.role_model_prompt)
-                                val tunedPrompt = "$rolePrompt\n\n$userPromt"
-                                val response = OllamaApiClient.generate(tunedPrompt)
-                                val cleanedResponse = MessageUtil.filterInvalidChars(response)
-                                if (cleanedResponse != null) {
-                                    promptResponse.value = cleanedResponse
-                                    // save automatically to Firestore
-                                    val userId = AuthManager.currentUid() ?: ""
-                                    if (userId.isNotBlank()) {
-                                        // run save on IO
-                                        CoroutineScope(Dispatchers.IO).launch {
-                                            val pr = PromptResponse(
-                                                userId = userId,
-                                                prompt = userPromt,
-                                                response = cleanedResponse
-                                            )
-                                            val result = promptsRepo.savePrompt(pr)
-                                            withContext(Dispatchers.Main) {
-                                                if (result.isSuccess) {
-                                                    Toast.makeText(
-                                                        context,
-                                                        "Salvo no Firebase",
-                                                        Toast.LENGTH_SHORT
-                                                    ).show()
-                                                } else {
-                                                    Toast.makeText(
-                                                        context,
-                                                        "Falha ao salvar: ${result.exceptionOrNull()?.message}",
-                                                        Toast.LENGTH_LONG
-                                                    ).show()
+                    Box(
+                        modifier = Modifier
+                            .weight(0.8f)
+                            .fillMaxWidth()
+                            .background(color = MaterialTheme.colorScheme.surface)
+                            .border(
+                                1.dp,
+                                MaterialTheme.colorScheme.onSurface,
+                                shape = RoundedCornerShape(1.dp)
+                            )
+                    ) {
+                        if (isLoading.value) {
+                            CircularProgressIndicator(
+                                color = MaterialTheme.colorScheme.primary,
+                                modifier = Modifier.padding(8.dp)
+                            )
+                        } else {
+                            ChatResponseField(promptResponse)
+                        }
+                    }
+
+                    HorizontalDivider(modifier = Modifier.padding(2.dp))
+
+                    Box(
+                        modifier = Modifier
+                            .weight(0.2f)
+                            .fillMaxWidth()
+                            .border(
+                                1.dp,
+                                MaterialTheme.colorScheme.onSurface,
+                                shape = RoundedCornerShape(1.dp)
+                            ),
+                    ) {
+                        UserInputField(prompt, onSend = { userPromt ->
+                            isLoading.value = true
+                            viewModel?.viewModelScope?.launch {
+                                try {
+                                    val rolePrompt = context.getString(R.string.role_model_prompt)
+                                    val tunedPrompt = "$rolePrompt\n\n$userPromt"
+                                    val response = OllamaApiClient.generate(tunedPrompt)
+                                    val cleanedResponse = MessageUtil.filterInvalidChars(response)
+                                    if (cleanedResponse != null) {
+                                        promptResponse.value = cleanedResponse
+                                        // save automatically to Firestore
+                                        val userId = AuthManager.currentUid() ?: ""
+                                        if (userId.isNotBlank()) {
+                                            // run save on IO
+                                            CoroutineScope(Dispatchers.IO).launch {
+                                                val pr = PromptResponse(
+                                                    userId = userId,
+                                                    prompt = userPromt,
+                                                    response = cleanedResponse
+                                                )
+                                                val result = promptsRepo.savePrompt(pr)
+                                                withContext(Dispatchers.Main) {
+                                                    if (result.isSuccess) {
+                                                        Toast.makeText(
+                                                            context,
+                                                            "Salvo no Firebase",
+                                                            Toast.LENGTH_SHORT
+                                                        ).show()
+                                                    } else {
+                                                        Toast.makeText(
+                                                            context,
+                                                            "Falha ao salvar: ${result.exceptionOrNull()?.message}",
+                                                            Toast.LENGTH_LONG
+                                                        ).show()
+                                                    }
                                                 }
                                             }
-                                        }
-                                    } else {
-                                        // user not authenticated, inform optionally
-                                        CoroutineScope(Dispatchers.Main).launch {
-                                            Toast.makeText(
-                                                context,
-                                                "Não autenticado no Firebase; não foi possível salvar",
-                                                Toast.LENGTH_SHORT
-                                            ).show()
+                                        } else {
+                                            // user not authenticated, inform optionally
+                                            CoroutineScope(Dispatchers.Main).launch {
+                                                Toast.makeText(
+                                                    context,
+                                                    "Não autenticado no Firebase; não foi possível salvar",
+                                                    Toast.LENGTH_SHORT
+                                                ).show()
+                                            }
                                         }
                                     }
-                                }
-                            } catch (e: Exception) {
-                                // Log the exception for diagnostics and show a friendly message
-                                Log.e(TAG, "Error calling Ollama API", e)
-                                promptResponse.value = context.getString(R.string.api_error_message)
-                            } finally {
-                                isLoading.value = false
-                            }
-                        }
-                        prompt.value = ""
-                    })
-                }
-            }
-
-            // Logout confirmation dialog
-            if (showLogoutDialog.value) {
-                AlertDialog(
-                    onDismissRequest = { showLogoutDialog.value = false },
-                    title = { Text(text = "Confirmar saída") },
-                    text = { Text(text = "Deseja realmente sair? Você precisará entrar novamente.") },
-                    confirmButton = {
-                        TextButton(onClick = {
-                            // perform logout
-                            Log.d(TAG, "Logout confirmed from dialog")
-                            try {
-                                com.rodolfoz.textaiapp.data.AuthManager.signOut()
-                            } catch (e: Exception) {
-                                Log.w(TAG, "Auth signOut failed: ${e.message}")
-                            }
-                            try {
-                                val prefs = context.getSharedPreferences(
-                                    "app_prefs",
-                                    android.content.Context.MODE_PRIVATE
-                                )
-                                prefs.edit().remove("saved_login").remove("saved_password_hash")
-                                    .apply()
-                            } catch (e: Exception) {
-                                Log.w(TAG, "Clearing prefs failed: ${e.message}")
-                            }
-                            try {
-                                navController.navigate("LoginUI") {
-                                    popUpTo("PromptAndResponseUI") { inclusive = true }
-                                }
-                            } catch (e: Exception) {
-                                Log.w(TAG, "Navigation to LoginUI failed: ${e.message}")
-                                try {
-                                    navController.navigate("LoginUI")
-                                } catch (_: Exception) {
+                                } catch (e: Exception) {
+                                    // Log the exception for diagnostics and show a friendly message
+                                    Log.e(TAG, "Error calling Ollama API", e)
+                                    promptResponse.value =
+                                        context.getString(R.string.api_error_message)
+                                } finally {
+                                    isLoading.value = false
                                 }
                             }
-                            showLogoutDialog.value = false
-                        }) { Text(text = "Sair") }
-                    },
-                    dismissButton = {
-                        TextButton(onClick = {
-                            showLogoutDialog.value = false
-                        }) { Text(text = "Cancelar") }
+                            prompt.value = ""
+                        })
                     }
-                )
+                }
             }
         }
     }

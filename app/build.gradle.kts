@@ -91,6 +91,8 @@ dependencies {
     implementation(libs.firebase.auth.ktx)
     // Firebase Firestore
     implementation(libs.firebase.firestore.ktx)
+    // Accompanist SwipeRefresh for pull-to-refresh
+    implementation(libs.accompanist.swiperefresh)
     // Coroutines support for Play Services Tasks (Task.await())
     implementation(libs.kotlinx.coroutines.play.services)
 }
