@@ -4,6 +4,7 @@ plugins {
     alias(libs.plugins.kotlin.android)
     alias(libs.plugins.compose.compiler)
     alias(libs.plugins.kotlinSerialization)
+    id("com.google.gms.google-services")
 }
 
 android {
@@ -84,4 +85,10 @@ dependencies {
     // Android Studio Preview Support
     implementation(libs.androidx.ui.tooling.preview)
     debugImplementation(libs.androidx.ui.tooling)
+
+    implementation(platform(libs.firebase.bom))
+    // Firebase Authentication (explicit version to ensure resolution)
+    implementation(libs.firebase.auth.ktx)
+    // Coroutines support for Play Services Tasks (Task.await())
+    implementation(libs.kotlinx.coroutines.play.services)
 }

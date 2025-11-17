@@ -11,6 +11,7 @@ package com.rodolfoz.textaiapp.ui.components
 
 import android.annotation.SuppressLint
 import android.util.Log
+import android.util.Patterns
 import android.widget.Toast
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.clickable
@@ -115,6 +116,11 @@ fun PersonalDataUI(navController: NavHostController, viewModel: PersonalDataView
                         user.phone.isNotBlank() && user.email.isNotBlank() &&
                         user.city.isNotBlank() && user.state.isNotBlank() && user.country.isNotBlank()
                     ) {
+                        // Validar formato de email
+                        if (!Patterns.EMAIL_ADDRESS.matcher(user.email).matches()) {
+                            Toast.makeText(context, "Email inválido", Toast.LENGTH_SHORT).show()
+                            return@Button
+                        }
                         viewModel?.saveUserData(
                             user,
                             onSuccess = {

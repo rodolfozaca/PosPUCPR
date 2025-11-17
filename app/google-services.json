@@ -1,0 +1,39 @@
+{
+  "project_info": {
+    "project_number": "336307232016",
+    "project_id": "textaiapp-dab55",
+    "storage_bucket": "textaiapp-dab55.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:336307232016:android:92b494effb892a9b1ed995",
+        "android_client_info": {
+          "package_name": "com.rodolfoz.textaiapp"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "336307232016-81j95jb9h8rh1hlvj0teps5pelcfe10l.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyBHFuq02jqxL5lc7UTTk7WObgvofBUb4O0"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "336307232016-81j95jb9h8rh1hlvj0teps5pelcfe10l.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

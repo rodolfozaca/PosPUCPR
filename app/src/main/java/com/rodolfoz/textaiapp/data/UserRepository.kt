@@ -50,6 +50,18 @@ class UserRepository(private val userDataDao: UserDataDao) {
         userDataDao.updateUser(user)
     }
 
+    suspend fun setFirebaseUidForUser(id: Int, firebaseUid: String) {
+        val user = userDataDao.getUserById(id) ?: return
+        user.firebaseUid = firebaseUid
+        userDataDao.updateUser(user)
+    }
+
+    suspend fun setFirebaseUidForUserByLogin(login: String, firebaseUid: String) {
+        val user = userDataDao.getUserByLogin(login) ?: return
+        user.firebaseUid = firebaseUid
+        userDataDao.updateUser(user)
+    }
+
     /**
      * Authenticate a user by login and raw password. Returns true if credentials match.
      */
@@ -65,4 +77,3 @@ class UserRepository(private val userDataDao: UserDataDao) {
         return digest.joinToString("") { "%02x".format(it) }
     }
 }
-

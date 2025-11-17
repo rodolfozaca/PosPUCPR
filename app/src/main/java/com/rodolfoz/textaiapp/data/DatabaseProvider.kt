@@ -49,11 +49,18 @@ object DatabaseProvider {
                 }
             }
 
+            // Migration 2 -> 3: adiciona coluna `firebaseUid` na tabela user_data
+            val MIGRATION_2_3 = object : Migration(2, 3) {
+                override fun migrate(db: SupportSQLiteDatabase) {
+                    db.execSQL("ALTER TABLE user_data ADD COLUMN firebaseUid TEXT DEFAULT '' NOT NULL")
+                }
+            }
+
             val instance = Room.databaseBuilder(
                 context.applicationContext,
                 AppDataBase::class.java,
                 "app_database"
-            ).addMigrations(MIGRATION_1_2)
+            ).addMigrations(MIGRATION_1_2, MIGRATION_2_3)
                 .build()
             INSTANCE = instance
             instance

@@ -39,5 +39,7 @@ class UserDataModel(
     var state: String = "",
     var country: String = "",
     var login: String = "",
-    var password: String = ""
+    var password: String = "",
+    // Firebase UID (populate after successful Firebase Auth). New column, default empty.
+    var firebaseUid: String = ""
 )

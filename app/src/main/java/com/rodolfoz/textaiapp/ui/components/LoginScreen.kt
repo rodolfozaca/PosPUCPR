@@ -11,8 +11,10 @@ package com.rodolfoz.textaiapp.ui.components
 
 import android.content.Context
 import android.util.Log
+import android.util.Patterns
 import android.widget.Toast
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Arrangement.Center
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -24,6 +26,7 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material3.Button
 import androidx.compose.material3.Checkbox
+import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -36,6 +39,7 @@ import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavHostController
+import com.rodolfoz.textaiapp.data.AuthManager.signInWithEmailAndPassword
 import com.rodolfoz.textaiapp.data.DatabaseProvider
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -49,6 +53,7 @@ fun LoginScreen(navController: NavHostController) {
     val loginState = remember { mutableStateOf("") }
     val passwordState = remember { mutableStateOf("") }
     val rememberLogin = remember { mutableStateOf(false) }
+    val isLoading = remember { mutableStateOf(false) }
 
     Column(
         modifier = Modifier
@@ -87,24 +92,108 @@ fun LoginScreen(navController: NavHostController) {
                 val repository = com.rodolfoz.textaiapp.data.UserRepository(db.userDataDao())
                 CoroutineScope(Dispatchers.IO).launch {
                     try {
+                        // Primeiro, tentar autenticação via Firebase se o usuário tem email cadastrado
+                        val localUser = repository.getUserByLogin(loginState.value.trim())
+                        if (localUser != null && localUser.email.isNotBlank()) {
+                            // validar email
+                            if (!Patterns.EMAIL_ADDRESS.matcher(localUser.email).matches()) {
+                                CoroutineScope(Dispatchers.Main).launch {
+                                    Toast.makeText(context, "Email inválido", Toast.LENGTH_SHORT)
+                                        .show()
+                                }
+                            } else {
+                                val firebaseResult = signInWithEmailAndPassword(
+                                    localUser.email,
+                                    passwordState.value.trim()
+                                )
+                                if (firebaseResult.isSuccess) {
+                                    // sucesso firebase
+                                    CoroutineScope(Dispatchers.Main).launch {
+                                        isLoading.value = false
+                                    }
+                                    // Autenticação via Firebase OK
+                                    val uid = firebaseResult.getOrNull() ?: ""
+                                    if (uid.isNotBlank()) {
+                                        try {
+                                            repository.setFirebaseUidForUserByLogin(
+                                                loginState.value.trim(),
+                                                uid
+                                            )
+                                        } catch (_: Exception) {
+                                            // non-fatal
+                                        }
+                                    }
+                                    // persist or clear saved credentials depending on checkbox
+                                    val prefs = context.getSharedPreferences(
+                                        "app_prefs",
+                                        Context.MODE_PRIVATE
+                                    )
+                                    if (rememberLogin.value) {
+                                        prefs.edit()
+                                            .putString("saved_login", localUser.login)
+                                            .putString("saved_password_hash", localUser.password)
+                                            .putBoolean("remember_login", true)
+                                            .apply()
+                                    } else {
+                                        // ensure we don't keep stale saved credentials
+                                        prefs.edit().remove("saved_login")
+                                            .remove("saved_password_hash").remove("remember_login")
+                                            .apply()
+                                    }
+                                    Log.d(
+                                        TAG,
+                                        "Firebase login succeeded for user=${localUser.login} uid=$uid"
+                                    )
+                                    CoroutineScope(Dispatchers.Main).launch {
+                                        Toast.makeText(
+                                            context,
+                                            "Login realizado (Firebase)",
+                                            Toast.LENGTH_SHORT
+                                        ).show()
+                                        navController.navigate("PromptAndResponseUI")
+                                    }
+                                    return@launch
+                                }
+                                // se falhou firebase, mostrar mensagem amigável (mas continuar para fallback)
+                                CoroutineScope(Dispatchers.Main).launch {
+                                    val msg = com.rodolfoz.textaiapp.data.AuthManager.mapAuthError(
+                                        firebaseResult.exceptionOrNull()
+                                    )
+                                    if (msg.isNotBlank()) Toast.makeText(
+                                        context,
+                                        "Firebase: $msg",
+                                        Toast.LENGTH_SHORT
+                                    ).show()
+                                    isLoading.value = false
+                                }
+                            }
+                            // se erro no Firebase, iremos tentar fallback para auth local abaixo
+                        }
+                        CoroutineScope(Dispatchers.Main).launch { isLoading.value = true }
                         val authenticated = repository.authenticate(
                             loginState.value.trim(),
                             passwordState.value.trim()
                         )
                         if (authenticated) {
+                            CoroutineScope(Dispatchers.Main).launch { isLoading.value = false }
                             // se o usuário pediu para lembrar, salvar nas prefs o login e o hash
+                            val prefs = context.getSharedPreferences(
+                                "app_prefs",
+                                Context.MODE_PRIVATE
+                            )
                             if (rememberLogin.value) {
                                 val user = repository.getUserByLogin(loginState.value.trim())
                                 if (user != null) {
-                                    val prefs = context.getSharedPreferences(
-                                        "app_prefs",
-                                        Context.MODE_PRIVATE
-                                    )
                                     prefs.edit()
                                         .putString("saved_login", user.login)
                                         .putString("saved_password_hash", user.password)
+                                        .putBoolean("remember_login", true)
                                         .apply()
                                 }
+                            } else {
+                                // clear any existing saved credentials
+                                prefs.edit().remove("saved_login").remove("saved_password_hash")
+                                    .remove("remember_login").apply()
                             }
                             CoroutineScope(Dispatchers.Main).launch {
                                 Toast.makeText(context, "Login realizado", Toast.LENGTH_SHORT)
@@ -112,6 +201,7 @@ fun LoginScreen(navController: NavHostController) {
                                 navController.navigate("PromptAndResponseUI")
                             }
                         } else {
+                            CoroutineScope(Dispatchers.Main).launch { isLoading.value = false }
                             // check if user exists at all to give a more precise message
                             val existing = repository.getUserByLogin(loginState.value.trim())
                             CoroutineScope(Dispatchers.Main).launch {
@@ -140,6 +230,14 @@ fun LoginScreen(navController: NavHostController) {
                 .fillMaxWidth()
         ) {
             Text(text = "Entrar")
+        }
+        if (isLoading.value) {
+            Row(
+                horizontalArrangement = Arrangement.Center,
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                CircularProgressIndicator(modifier = Modifier.padding(top = 8.dp))
+            }
         }
 
         // Checkbox lembrar login

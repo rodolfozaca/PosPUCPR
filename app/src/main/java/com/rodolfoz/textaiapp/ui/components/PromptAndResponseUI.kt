@@ -13,7 +13,6 @@ import android.annotation.SuppressLint
 import android.util.Log
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
-import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -26,33 +25,32 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.statusBars
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.foundation.text.BasicTextField
-import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.automirrored.filled.Send
-import androidx.compose.material.icons.filled.Refresh
+import androidx.compose.material.icons.automirrored.filled.ExitToApp
+import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
+import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.TextStyle
-import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewModelScope
+import androidx.navigation.NavHostController
+import androidx.navigation.compose.rememberNavController
 import com.rodolfoz.textaiapp.R
 import com.rodolfoz.textaiapp.domain.MessageUtil
 import com.rodolfoz.textaiapp.domain.OllamaApiClient
@@ -68,13 +66,14 @@ private const val TAG = "TAA: PromptAndResponseUI"
  */
 @SuppressLint("UnusedMaterial3ScaffoldPaddingParameter")
 @Composable
-fun PromptAndResponseUI(viewModel: PersonalDataViewModel?) {
+fun PromptAndResponseUI(viewModel: PersonalDataViewModel?, navController: NavHostController) {
     Log.d(TAG, "PromptAndResponseUI")
 
     val context = LocalContext.current
     val prompt = remember { mutableStateOf("") }
     val promptResponse = remember { mutableStateOf("") }
     val isLoading = remember { mutableStateOf(false) }
+    val showLogoutDialog = remember { mutableStateOf(false) }
 
     LaunchedEffect(Unit) {
         val messageOne = context.getString(R.string.welcome_message_part_one)
@@ -94,193 +93,142 @@ fun PromptAndResponseUI(viewModel: PersonalDataViewModel?) {
             modifier = Modifier
                 .fillMaxSize()
                 .padding(2.dp)
-                .verticalScroll(rememberScrollState())
         ) {
-            Box(
+            Row(
                 modifier = Modifier
-                    .weight(0.8f)
                     .fillMaxWidth()
-                    .background(color = MaterialTheme.colorScheme.surface)
-                    .border(
-                        1.dp,
-                        MaterialTheme.colorScheme.onSurface,
-                        shape = RoundedCornerShape(1.dp)
-                    )
+                    .background(MaterialTheme.colorScheme.surface)
+                    .padding(8.dp),
+                verticalAlignment = Alignment.CenterVertically
             ) {
-                if (isLoading.value) {
-                    CircularProgressIndicator(
-                        color = MaterialTheme.colorScheme.primary,
-                        modifier = Modifier.padding(8.dp)
-                    )
-                } else {
-                    ChatResponseField(promptResponse)
+                Text(
+                    text = "TextAIApp",
+                    style = TextStyle(fontSize = 18.sp),
+                    color = MaterialTheme.colorScheme.onPrimaryContainer
+                )
+                Box(modifier = Modifier.weight(1f))
+                IconButton(onClick = { showLogoutDialog.value = true }) {
+                    Icon(Icons.AutoMirrored.Filled.ExitToApp, contentDescription = "Logout")
                 }
-
             }
 
             HorizontalDivider(modifier = Modifier.padding(2.dp))
 
-            Box(
+            Column(
                 modifier = Modifier
-                    .weight(0.2f)
-                    .fillMaxWidth()
-                    .border(
-                        1.dp,
-                        MaterialTheme.colorScheme.onSurface,
-                        shape = RoundedCornerShape(1.dp)
-                    ),
+                    .fillMaxSize()
+                    .padding(2.dp)
+                    .verticalScroll(rememberScrollState())
             ) {
-                UserInputField(prompt, onSend = { userPromt ->
-                    isLoading.value = true
-                    viewModel?.viewModelScope?.launch {
-                        try {
-                            val rolePrompt = context.getString(R.string.role_model_prompt)
-                            val tunedPrompt = "$rolePrompt\n\n$userPromt"
-                            val response = OllamaApiClient.generate(tunedPrompt)
-                            val cleanedResponse = MessageUtil.filterInvalidChars(response)
-                            if (cleanedResponse != null) {
-                                promptResponse.value = cleanedResponse
-                            }
-                        } catch (e: Exception) {
-                            // Log the exception for diagnostics and show a friendly message
-                            Log.e(TAG, "Error calling Ollama API", e)
-                            promptResponse.value = context.getString(R.string.api_error_message)
-                        } finally {
-                            isLoading.value = false
-                        }
+                Box(
+                    modifier = Modifier
+                        .weight(0.8f)
+                        .fillMaxWidth()
+                        .background(color = MaterialTheme.colorScheme.surface)
+                        .border(
+                            1.dp,
+                            MaterialTheme.colorScheme.onSurface,
+                            shape = RoundedCornerShape(1.dp)
+                        )
+                ) {
+                    if (isLoading.value) {
+                        CircularProgressIndicator(
+                            color = MaterialTheme.colorScheme.primary,
+                            modifier = Modifier.padding(8.dp)
+                        )
+                    } else {
+                        ChatResponseField(promptResponse)
                     }
-                    prompt.value = ""
-                })
+                }
+
+                HorizontalDivider(modifier = Modifier.padding(2.dp))
+
+                Box(
+                    modifier = Modifier
+                        .weight(0.2f)
+                        .fillMaxWidth()
+                        .border(
+                            1.dp,
+                            MaterialTheme.colorScheme.onSurface,
+                            shape = RoundedCornerShape(1.dp)
+                        ),
+                ) {
+                    UserInputField(prompt, onSend = { userPromt ->
+                        isLoading.value = true
+                        viewModel?.viewModelScope?.launch {
+                            try {
+                                val rolePrompt = context.getString(R.string.role_model_prompt)
+                                val tunedPrompt = "$rolePrompt\n\n$userPromt"
+                                val response = OllamaApiClient.generate(tunedPrompt)
+                                val cleanedResponse = MessageUtil.filterInvalidChars(response)
+                                if (cleanedResponse != null) {
+                                    promptResponse.value = cleanedResponse
+                                }
+                            } catch (e: Exception) {
+                                // Log the exception for diagnostics and show a friendly message
+                                Log.e(TAG, "Error calling Ollama API", e)
+                                promptResponse.value = context.getString(R.string.api_error_message)
+                            } finally {
+                                isLoading.value = false
+                            }
+                        }
+                        prompt.value = ""
+                    })
+                }
+            }
+
+            // Logout confirmation dialog
+            if (showLogoutDialog.value) {
+                AlertDialog(
+                    onDismissRequest = { showLogoutDialog.value = false },
+                    title = { Text(text = "Confirmar saída") },
+                    text = { Text(text = "Deseja realmente sair? Você precisará entrar novamente.") },
+                    confirmButton = {
+                        TextButton(onClick = {
+                            // perform logout
+                            Log.d(TAG, "Logout confirmed from dialog")
+                            try {
+                                com.rodolfoz.textaiapp.data.AuthManager.signOut()
+                            } catch (e: Exception) {
+                                Log.w(TAG, "Auth signOut failed: ${e.message}")
+                            }
+                            try {
+                                val prefs = context.getSharedPreferences(
+                                    "app_prefs",
+                                    android.content.Context.MODE_PRIVATE
+                                )
+                                prefs.edit().remove("saved_login").remove("saved_password_hash")
+                                    .apply()
+                            } catch (e: Exception) {
+                                Log.w(TAG, "Clearing prefs failed: ${e.message}")
+                            }
+                            try {
+                                navController.navigate("LoginUI") {
+                                    popUpTo("PromptAndResponseUI") { inclusive = true }
+                                }
+                            } catch (e: Exception) {
+                                Log.w(TAG, "Navigation to LoginUI failed: ${e.message}")
+                                try {
+                                    navController.navigate("LoginUI")
+                                } catch (_: Exception) {
+                                }
+                            }
+                            showLogoutDialog.value = false
+                        }) { Text(text = "Sair") }
+                    },
+                    dismissButton = {
+                        TextButton(onClick = {
+                            showLogoutDialog.value = false
+                        }) { Text(text = "Cancelar") }
+                    }
+                )
             }
         }
     }
 }
 
-/**
- * Composable function to display the chat response field.
- *
- * @param promptResponse The mutable state holding the chat response text.
- */
-@Composable
-fun ChatResponseField(
-    promptResponse: MutableState<String>
-) {
-    BasicTextField(
-        value = promptResponse.value,
-        onValueChange = { promptResponse.value = it },
-        modifier = Modifier
-            .fillMaxSize()
-            .background(MaterialTheme.colorScheme.surface)
-            .padding(8.dp),
-        textStyle = TextStyle(
-            color = MaterialTheme.colorScheme.onSurface,
-            fontSize = 20.sp,
-            letterSpacing = 0.5.sp,
-            lineHeight = 24.sp
-        ),
-        interactionSource = remember { MutableInteractionSource() },
-        keyboardOptions = KeyboardOptions.Default.copy(imeAction = ImeAction.None)
-    )
-}
-
-/**
- * Composable function to display the user input field.
- *
- * @param prompt The mutable state holding the user input text.
- * @param onSend Callback function to handle the send action.
- */
-@Composable
-fun UserInputField(
-    prompt: MutableState<String>,
-    onSend: (String) -> Unit
-) {
-    BasicTextField(
-        value = prompt.value,
-        onValueChange = { prompt.value = it },
-        modifier = Modifier
-            .fillMaxSize()
-            .background(MaterialTheme.colorScheme.surface)
-            .padding(8.dp),
-        textStyle = TextStyle(
-            color = MaterialTheme.colorScheme.onSurface,
-            fontSize = 20.sp,
-            letterSpacing = 0.5.sp,
-            lineHeight = 24.sp
-        ),
-        interactionSource = remember { MutableInteractionSource() },
-        keyboardOptions = KeyboardOptions.Default.copy(imeAction = ImeAction.None),
-        decorationBox = { innerTextField: @Composable () -> Unit ->
-            Box(
-                Modifier
-                    .background(MaterialTheme.colorScheme.surface, shape = RoundedCornerShape(8.dp))
-            ) {
-                Row(
-                    Modifier.fillMaxSize()
-                ) {
-                    Box(
-                        modifier = Modifier
-                            .weight(1f)
-                            .fillMaxSize()
-                    ) {
-                        innerTextField()
-                        Box(
-                            Modifier
-                                .align(Alignment.BottomEnd)
-                                .padding(start = 8.dp)
-                        ) {
-                            Row {
-                                IconButton(onClick = {
-                                    if (prompt.value.isNotEmpty()) {
-                                        prompt.value = ""
-                                    }
-                                }) {
-                                    Icon(
-                                        Icons.Default.Refresh,
-                                        contentDescription = "Refresh",
-                                        tint = MaterialTheme.colorScheme.primary
-                                    )
-                                }
-                                IconButton(onClick = {
-                                    if (prompt.value.isNotEmpty()) {
-                                        onSend(prompt.value)
-                                    }
-                                }) {
-                                    Icon(
-                                        Icons.AutoMirrored.Filled.Send,
-                                        contentDescription = "Send",
-                                        tint = MaterialTheme.colorScheme.primary
-                                    )
-                                }
-                            }
-                        }
-                    }
-                }
-            }
-        }
-    )
-}
-
-@Preview(showBackground = true, name = "ChatResponseField Preview")
-@Composable
-fun PreviewChatResponseField() {
-    val loremIpsum =
-        stringResource(R.string.lorem_ipsum_dolor_sit_amet_consectetur_adipiscing_elit)
-
-    val promptResponse = remember { mutableStateOf(loremIpsum) }
-    ChatResponseField(promptResponse)
-}
-
-@Preview(showBackground = true, name = "UserInputField Preview")
-@Composable
-fun PreviewUserInputField() {
-    val loremIpsum =
-        stringResource(R.string.lorem_ipsum_dolor_sit_amet_consectetur_adipiscing_elit)
-    val prompt = remember { mutableStateOf(loremIpsum) }
-    UserInputField(prompt, onSend = {})
-}
-
 @Preview(showBackground = true, name = "PromptAndResponseUIPreview")
 @Composable
 fun PreviewPromptAndResponseUI() {
-    PromptAndResponseUI(null)
+    PromptAndResponseUI(null, navController = rememberNavController())
 }

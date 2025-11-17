@@ -17,6 +17,7 @@ import androidx.lifecycle.lifecycleScope
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
+import com.rodolfoz.textaiapp.data.AuthManager.isSignedIn
 import com.rodolfoz.textaiapp.data.DatabaseProvider
 import com.rodolfoz.textaiapp.ui.components.LoginScreen
 import com.rodolfoz.textaiapp.ui.components.PasswordSetupScreen
@@ -42,16 +43,23 @@ class MainActivity : AppCompatActivity() {
             val prefs = getSharedPreferences("app_prefs", MODE_PRIVATE)
             val savedLogin = prefs.getString("saved_login", null)
             val savedHash = prefs.getString("saved_password_hash", null)
+            val rememberFlag = prefs.getBoolean("remember_login", false)
 
             var startDestination = "LoginUI"
 
-            if (!savedLogin.isNullOrBlank() && !savedHash.isNullOrBlank()) {
-                // validar com o DB
-                val db = DatabaseProvider.getDatabase(this@MainActivity)
-                val user =
-                    withContext(Dispatchers.IO) { db.userDataDao().getUserByLogin(savedLogin) }
-                if (user != null && user.password == savedHash) {
-                    startDestination = "PromptAndResponseUI"
+            // Se usuário já estiver autenticado no Firebase E marcou lembrar_login, pular para a tela principal
+            if (isSignedIn() && rememberFlag) {
+                startDestination = "PromptAndResponseUI"
+            } else {
+                // Caso não esteja autenticado no Firebase, usar credenciais locais só se rememberFlag estiver marcado
+                if (rememberFlag && !savedLogin.isNullOrBlank() && !savedHash.isNullOrBlank()) {
+                    // validar com o DB
+                    val db = DatabaseProvider.getDatabase(this@MainActivity)
+                    val user =
+                        withContext(Dispatchers.IO) { db.userDataDao().getUserByLogin(savedLogin) }
+                    if (user != null && user.password == savedHash) {
+                        startDestination = "PromptAndResponseUI"
+                    }
                 }
             }
 
@@ -69,7 +77,8 @@ class MainActivity : AppCompatActivity() {
                             PasswordSetupScreen(navController)
                         }
                         composable("PromptAndResponseUI") {
-                            PromptAndResponseScreen()
+                            // pass the host navController so PromptAndResponseScreen/ UI can navigate back to LoginUI
+                            PromptAndResponseScreen(navController = navController)
                         }
                     }
                 }
