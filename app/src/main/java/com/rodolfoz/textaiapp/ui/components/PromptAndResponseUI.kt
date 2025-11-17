@@ -11,6 +11,7 @@ package com.rodolfoz.textaiapp.ui.components
 
 import android.annotation.SuppressLint
 import android.util.Log
+import android.widget.Toast
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Box
@@ -52,10 +53,16 @@ import androidx.lifecycle.viewModelScope
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.rememberNavController
 import com.rodolfoz.textaiapp.R
+import com.rodolfoz.textaiapp.data.AuthManager
+import com.rodolfoz.textaiapp.data.FirebasePromptsRepository
+import com.rodolfoz.textaiapp.data.model.PromptResponse
 import com.rodolfoz.textaiapp.domain.MessageUtil
 import com.rodolfoz.textaiapp.domain.OllamaApiClient
 import com.rodolfoz.textaiapp.ui.viewmodels.PersonalDataViewModel
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 
 private const val TAG = "TAA: PromptAndResponseUI"
 
@@ -74,6 +81,9 @@ fun PromptAndResponseUI(viewModel: PersonalDataViewModel?, navController: NavHos
     val promptResponse = remember { mutableStateOf("") }
     val isLoading = remember { mutableStateOf(false) }
     val showLogoutDialog = remember { mutableStateOf(false) }
+
+    // repository for saving prompts in Firestore
+    val promptsRepo = FirebasePromptsRepository()
 
     LaunchedEffect(Unit) {
         val messageOne = context.getString(R.string.welcome_message_part_one)
@@ -163,6 +173,43 @@ fun PromptAndResponseUI(viewModel: PersonalDataViewModel?, navController: NavHos
                                 val cleanedResponse = MessageUtil.filterInvalidChars(response)
                                 if (cleanedResponse != null) {
                                     promptResponse.value = cleanedResponse
+                                    // save automatically to Firestore
+                                    val userId = AuthManager.currentUid() ?: ""
+                                    if (userId.isNotBlank()) {
+                                        // run save on IO
+                                        CoroutineScope(Dispatchers.IO).launch {
+                                            val pr = PromptResponse(
+                                                userId = userId,
+                                                prompt = userPromt,
+                                                response = cleanedResponse
+                                            )
+                                            val result = promptsRepo.savePrompt(pr)
+                                            withContext(Dispatchers.Main) {
+                                                if (result.isSuccess) {
+                                                    Toast.makeText(
+                                                        context,
+                                                        "Salvo no Firebase",
+                                                        Toast.LENGTH_SHORT
+                                                    ).show()
+                                                } else {
+                                                    Toast.makeText(
+                                                        context,
+                                                        "Falha ao salvar: ${result.exceptionOrNull()?.message}",
+                                                        Toast.LENGTH_LONG
+                                                    ).show()
+                                                }
+                                            }
+                                        }
+                                    } else {
+                                        // user not authenticated, inform optionally
+                                        CoroutineScope(Dispatchers.Main).launch {
+                                            Toast.makeText(
+                                                context,
+                                                "Não autenticado no Firebase; não foi possível salvar",
+                                                Toast.LENGTH_SHORT
+                                            ).show()
+                                        }
+                                    }
                                 }
                             } catch (e: Exception) {
                                 // Log the exception for diagnostics and show a friendly message

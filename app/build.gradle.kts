@@ -89,6 +89,8 @@ dependencies {
     implementation(platform(libs.firebase.bom))
     // Firebase Authentication (explicit version to ensure resolution)
     implementation(libs.firebase.auth.ktx)
+    // Firebase Firestore
+    implementation(libs.firebase.firestore.ktx)
     // Coroutines support for Play Services Tasks (Task.await())
     implementation(libs.kotlinx.coroutines.play.services)
 }
